@@ -1,5 +1,7 @@
 # Temperature Heatmap Card
 
+[![AI Assisted](https://img.shields.io/badge/AI-Claude%20Code-AAAAAA.svg)](https://claude.ai/code)
+
 A custom Home Assistant Lovelace card that displays temperature data as a color-coded heatmap, showing hourly patterns across multiple days with flexible aggregation modes.
 
 ## Features
@@ -151,5 +153,3 @@ This project is licensed under the MIT License.
 ## Support
 
 For issues, feature requests, or contributions, please visit the GitHub repository.
-
-[![AI Assisted](https://img.shields.io/badge/AI-Claude%20Code-AAAAAA.svg)](https://claude.ai/code)
