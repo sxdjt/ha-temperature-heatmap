@@ -14,6 +14,8 @@ A custom Home Assistant Lovelace card that displays temperature data as a color-
 - Navigation between time periods (previous/next/current)
 - Min/Max/Avg statistics footer
 
+<img width="1027" height="727" alt="example" src="https://github.com/user-attachments/assets/5b6c5114-9866-4e58-801e-f738583f0f02" />
+
 ## Configuration
 
 ### Minimal Configuration
