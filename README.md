@@ -15,7 +15,7 @@ A custom Home Assistant Lovelace card that displays temperature data as a color-
 - Min/Max/Avg statistics footer
 - Pairs well with the [Windspeed heatmap card](https://github.com/sxdjt/ha-windspeed-heatmap)
 
-<img width="1027" height="727" alt="example" src="https://github.com/user-attachments/assets/5b6c5114-9866-4e58-801e-f738583f0f02" />
+![Temperature Heatmap Card Example](https://github.com/user-attachments/assets/5b6c5114-9866-4e58-801e-f738583f0f02)
 
 ## Installation
 
