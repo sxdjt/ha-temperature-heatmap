@@ -133,8 +133,8 @@ class TemperatureHeatmapCard extends HTMLElement {
       show_entity_name: config.show_entity_name || false
     };
 
-    // Sort thresholds by value (ascending)
-    this._config.color_thresholds.sort((a, b) => a.value - b.value);
+    // Sort thresholds by value (ascending) - create mutable copy to avoid "read-only" errors
+    this._config.color_thresholds = [...this._config.color_thresholds].sort((a, b) => a.value - b.value);
 
     // Set up refresh interval
     if (this._hass) {
