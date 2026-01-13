@@ -6,7 +6,7 @@ A custom Home Assistant Lovelace card that displays temperature data as a color-
 
 ## Features
 
-- Color-coded heatmap visualization of temperature history
+- Color-coded heatmap visualization of temperature history ( **_or any numeric sensor_** )
 - Three aggregation modes: average, minimum, and maximum
 - Auto-detection of temperature scale (Fahrenheit/Celsius)
 - Configurable time periods (1-30 days) and intervals (1-24 hours)
@@ -145,15 +145,6 @@ color_thresholds:
 
 The `time_interval` option determines how many hours of data are aggregated into each row:
 
-- `1`: Hourly view (24 rows per day)
-- `2`: Every 2 hours (12 rows per day) - **Default**
-- `3`: Every 3 hours (8 rows per day)
-- `4`: Every 4 hours (6 rows per day)
-- `6`: Every 6 hours (4 rows per day)
-- `8`: Every 8 hours (3 rows per day)
-- `12`: Every 12 hours (2 rows per day)
-- `24`: Daily view (1 row per day)
-
 ## Hour Filtering
 
 Use `start_hour` and `end_hour` to limit which hours are displayed. This is useful for focusing on specific time periods and reducing visual clutter.
@@ -211,6 +202,12 @@ With `time_interval: 2` and `start_hour: 8`, `end_hour: 18`:
 ## Display Precision
 
 The `decimals` option controls how many decimal places are shown for temperature values (0-2):
+
+## Using non-temperature sensor readings
+
+The card will process and display any sensor that returns numeric data.  Here is an example showing air quality data
+
+<img width="507" height="720" alt="Screenshot 2026-01-13 at 00 07 40" src="https://github.com/user-attachments/assets/f6de4ec3-b8a9-49ef-a108-77b73081af9b" />
 
 ## License
 
