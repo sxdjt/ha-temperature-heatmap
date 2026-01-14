@@ -1,4 +1,4 @@
-/* Last modified: 12-Jan-2026 23:08 */
+/* Last modified: 13-Jan-2026 01:32 */
 
 // Register with Home Assistant custom cards
 window.customCards = window.customCards || [];
@@ -110,6 +110,42 @@ class TemperatureHeatmapCard extends HTMLElement {
       throw new Error('end_hour must be an integer between 0 and 23');
     }
 
+    // Validate cell sizing options
+    if (config.cell_height !== undefined) {
+      const height = typeof config.cell_height === 'number' ? config.cell_height : parseFloat(config.cell_height);
+      if (isNaN(height) || height < 10 || height > 200) {
+        throw new Error('cell_height must be between 10 and 200 pixels');
+      }
+    }
+
+    if (config.cell_padding !== undefined) {
+      const padding = typeof config.cell_padding === 'number' ? config.cell_padding : parseFloat(config.cell_padding);
+      if (isNaN(padding) || padding < 0 || padding > 20) {
+        throw new Error('cell_padding must be between 0 and 20 pixels');
+      }
+    }
+
+    if (config.cell_gap !== undefined) {
+      const gap = typeof config.cell_gap === 'number' ? config.cell_gap : parseFloat(config.cell_gap);
+      if (isNaN(gap) || gap < 0 || gap > 20) {
+        throw new Error('cell_gap must be between 0 and 20 pixels');
+      }
+    }
+
+    if (config.cell_font_size !== undefined) {
+      const fontSize = typeof config.cell_font_size === 'number' ? config.cell_font_size : parseFloat(config.cell_font_size);
+      if (isNaN(fontSize) || fontSize < 6 || fontSize > 24) {
+        throw new Error('cell_font_size must be between 6 and 24 pixels');
+      }
+    }
+
+    if (config.cell_width !== undefined && typeof config.cell_width !== 'string') {
+      const width = parseFloat(config.cell_width);
+      if (isNaN(width) || width < 10 || width > 500) {
+        throw new Error('cell_width as number must be between 10 and 500 pixels');
+      }
+    }
+
     // Build configuration with defaults
     this._config = {
       // Required
@@ -144,7 +180,15 @@ class TemperatureHeatmapCard extends HTMLElement {
       click_action: config.click_action || 'more-info',  // 'none', 'more-info', 'tooltip'
 
       // Display options
-      show_entity_name: config.show_entity_name || false
+      show_entity_name: config.show_entity_name || false,
+
+      // Cell sizing options
+      cell_height: config.cell_height !== undefined ? config.cell_height : 36,
+      cell_width: config.cell_width !== undefined ? config.cell_width : '1fr',
+      cell_padding: config.cell_padding !== undefined ? config.cell_padding : 2,
+      cell_gap: config.cell_gap !== undefined ? config.cell_gap : 2,
+      cell_font_size: config.cell_font_size !== undefined ? config.cell_font_size : 11,
+      compact: config.compact || false
     };
 
     // Sort thresholds by value (ascending) - create mutable copy to avoid "read-only" errors
@@ -179,10 +223,13 @@ class TemperatureHeatmapCard extends HTMLElement {
 
   // Home Assistant required method: return card height hint
   getCardSize() {
-    // Calculate based on number of rows (time slots)
+    // Calculate based on number of rows (time slots) and dynamic cell height
     const rows = this._processedData ? this._processedData.rows.length : 12;
-    // Each row ~36px, plus header ~60px, plus footer ~40px, divided by 50px per card unit
-    return Math.ceil((rows * 36 + 100) / 50);
+    const sizing = this._getEffectiveSizing();
+    const cellHeightPx = parseFloat(sizing.cellHeight) || 36;
+
+    // Each row = cellHeight, plus header ~60px, plus footer ~40px, divided by 50px per card unit
+    return Math.ceil((rows * cellHeightPx + 100) / 50);
   }
 
   // Lifecycle: component connected to DOM
@@ -322,17 +369,17 @@ class TemperatureHeatmapCard extends HTMLElement {
       .time-labels {
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: var(--cell-gap, 2px);
         padding-top: 28px;  /* Align with data grid (after date headers) */
       }
 
       .time-label {
-        height: 36px;
+        height: var(--cell-height, 36px);
         display: flex;
         align-items: center;
         justify-content: flex-end;
         padding-right: 8px;
-        font-size: 11px;
+        font-size: var(--cell-font-size, 11px);
         color: var(--secondary-text-color);
         font-weight: 500;
       }
@@ -363,9 +410,9 @@ class TemperatureHeatmapCard extends HTMLElement {
       /* Data cells grid */
       .data-grid {
         display: grid;
-        grid-template-columns: repeat(var(--days-count, 7), 1fr);
-        grid-auto-rows: 36px;
-        gap: 2px;
+        grid-template-columns: repeat(var(--days-count, 7), var(--cell-width, 1fr));
+        grid-auto-rows: var(--cell-height, 36px);
+        gap: var(--cell-gap, 2px);
       }
 
       /* Individual cells */
@@ -378,8 +425,8 @@ class TemperatureHeatmapCard extends HTMLElement {
         cursor: pointer;
         transition: transform 0.1s ease, box-shadow 0.1s ease;
         position: relative;
-        font-size: 11px;
-        padding: 2px;
+        font-size: var(--cell-font-size, 11px);
+        padding: var(--cell-padding, 2px);
         box-sizing: border-box;
       }
 
@@ -514,16 +561,16 @@ class TemperatureHeatmapCard extends HTMLElement {
       /* Responsive adjustments */
       @media (max-width: 600px) {
         .data-grid {
-          grid-auto-rows: 30px;
+          grid-auto-rows: calc(var(--cell-height, 36px) * 0.83);
         }
 
         .time-label {
-          height: 30px;
-          font-size: 10px;
+          height: calc(var(--cell-height, 36px) * 0.83);
+          font-size: calc(var(--cell-font-size, 11px) * 0.91);
         }
 
         .cell {
-          font-size: 10px;
+          font-size: calc(var(--cell-font-size, 11px) * 0.91);
         }
 
         .date-header {
@@ -868,9 +915,16 @@ class TemperatureHeatmapCard extends HTMLElement {
       ${this._processedData && !this._error ? this._renderFooter() : ''}
     `;
 
-    // Set CSS variable for grid columns
+    // Set CSS variables for grid layout and cell sizing
     if (this._processedData) {
       this._content.style.setProperty('--days-count', this._config.days);
+
+      const sizing = this._getEffectiveSizing();
+      this._content.style.setProperty('--cell-height', sizing.cellHeight);
+      this._content.style.setProperty('--cell-width', sizing.cellWidth);
+      this._content.style.setProperty('--cell-padding', sizing.cellPadding);
+      this._content.style.setProperty('--cell-gap', sizing.cellGap);
+      this._content.style.setProperty('--cell-font-size', sizing.cellFontSize);
     }
   }
 
@@ -1199,6 +1253,40 @@ class TemperatureHeatmapCard extends HTMLElement {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  // Normalize size values: numbers → "Npx", strings → pass through
+  _normalizeSize(value, defaultValue) {
+    if (value === undefined || value === null || value === '') {
+      return defaultValue;
+    }
+    if (typeof value === 'number') {
+      return `${value}px`;
+    }
+    return String(value);
+  }
+
+  // Get effective sizing configuration (handles compact mode override)
+  _getEffectiveSizing() {
+    // If compact mode is enabled, use preset values
+    if (this._config.compact) {
+      return {
+        cellHeight: '24px',
+        cellWidth: '1fr',
+        cellPadding: '1px',
+        cellGap: '1px',
+        cellFontSize: '9px',
+      };
+    }
+
+    // Otherwise use configured or default values
+    return {
+      cellHeight: this._normalizeSize(this._config.cell_height, '36px'),
+      cellWidth: this._normalizeSize(this._config.cell_width, '1fr'),
+      cellPadding: this._normalizeSize(this._config.cell_padding, '2px'),
+      cellGap: this._normalizeSize(this._config.cell_gap, '2px'),
+      cellFontSize: this._normalizeSize(this._config.cell_font_size, '11px'),
+    };
   }
 }
 

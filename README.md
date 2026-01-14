@@ -8,13 +8,14 @@ A custom Home Assistant Lovelace card that displays temperature data as a color-
 
 - Color-coded heatmap visualization of temperature history ( **_or any numeric sensor_** )
 - Three aggregation modes: average, minimum, and maximum
+- Configurable card sizing: compact mode, specify cell height/width, etc.
 - Auto-detection of temperature scale (Fahrenheit/Celsius)
 - Configurable time periods (1-30 days) and intervals (1-24 hours)
 - Hour filtering to display specific time ranges (e.g., daytime only, nighttime with wrap-around)
 - Customizable color thresholds
 - Navigation between time periods (previous/next/current)
 - Min/Max/Avg statistics footer
-- Pairs well with the [Windspeed heatmap card](https://github.com/sxdjt/ha-windspeed-heatmap)
+- **Pairs well with the [Windspeed heatmap card](https://github.com/sxdjt/ha-windspeed-heatmap)**
 
 ![Temperature Heatmap Card Example](https://github.com/user-attachments/assets/5b6c5114-9866-4e58-801e-f738583f0f02)
 
@@ -75,8 +76,14 @@ color_thresholds:
 |--------|------|---------|-------------|
 | `entity` | string | **Required** | Temperature sensor entity ID |
 | `aggregation_mode` | string | `"average"` | Data aggregation: "average", "min", or "max" |
+| `cell_font_size` | number/string | `11` | Cell font size (6-24 pixels) |
+| `cell_gap` | number/string | `2` | Gap between cells (0-20 pixels) |
+| `cell_height` | number/string | `36` | Cell height (10-200 pixels) |
+| `cell_padding` | number/string | `2` | Padding inside cells (0-20 pixels) |
+| `cell_width` | number/string | `"1fr"` | Column width (1fr, auto, 60px, 25%, etc.) |
 | `click_action` | string | `"tooltip"` | Cell click action: "tooltip", "more-info", or "none" |
 | `color_thresholds` | array | See below | Color mapping for temperatures |
+| `compact` | boolean | `false` | Enable compact mode (overrides cell sizing properties) |
 | `days` | number | `7` | Number of days to display (1-30) |
 | `decimals` | number | `1` | Decimal places to display: 0, 1, or 2 |
 | `end_hour` | number | `23` | End hour for display filter (0-23) |
@@ -151,9 +158,7 @@ Use `start_hour` and `end_hour` to limit which hours are displayed. This is usef
 
 Note: The card still fetches all 24 hours of data, but only displays and calculates statistics for the filtered hours.
 
-### Normal Range (Daytime)
-
-Display only 08:00 through 17:00:
+**Display 08:00 to 17:00:**
 
 ```yaml
 type: custom:ha-temperature-heatmap-card
@@ -163,9 +168,7 @@ start_hour: 8
 end_hour: 17
 ```
 
-### Wrap-around Range (Nighttime)
-
-Display 22:00, 23:00, 00:00, 01:00, 02:00, 03:00, 04:00, 05:00:
+**Display 22:00 to 05:00:**
 
 ```yaml
 type: custom:ha-temperature-heatmap-card
@@ -175,9 +178,7 @@ start_hour: 22
 end_hour: 5
 ```
 
-### Single Hour
-
-Display only the noon hour:
+**Display only the noon hour:**
 
 ```yaml
 type: custom:ha-temperature-heatmap-card
@@ -187,21 +188,104 @@ start_hour: 12
 end_hour: 12
 ```
 
-### Hour Filtering with Time Intervals
-
-When using intervals greater than 1 hour, filtering applies to the start hour of each time bucket:
-
-With `time_interval: 2` and `start_hour: 8`, `end_hour: 18`:
-- Row hour 6 (06:00-07:59): NOT displayed
-- Row hour 8 (08:00-09:59): displayed
-- Row hour 10 (10:00-11:59): displayed
-- ...
-- Row hour 18 (18:00-19:59): displayed
-- Row hour 20 (20:00-21:59): NOT displayed
-
-## Display Precision
+## Rounding
 
 The `decimals` option controls how many decimal places are shown for temperature values (0-2):
+
+## Cell Sizing Customization
+
+Control the visual density of the heatmap with individual sizing properties or compact mode.
+
+### Individual Properties
+
+Customize cell dimensions with specific size values:
+
+```yaml
+type: custom:ha-temperature-heatmap-card
+entity: sensor.outdoor_temperature
+cell_height: 40           # Cell height in pixels (default: 36)
+cell_width: "1fr"         # Column width - 1fr (default), auto, 60px, 25%, etc.
+cell_padding: 3           # Padding inside cells (default: 2)
+cell_gap: 3               # Gap between cells (default: 2)
+cell_font_size: 12        # Temperature font size (default: 11)
+```
+
+#### Size Value Formats
+
+- Numbers automatically convert to pixels: `cell_height: 40` becomes "40px"
+- Strings pass through as-is: `cell_width: "1fr"`, `cell_width: "25%"`
+- Valid ranges:
+  - `cell_height`: 10-200 pixels
+  - `cell_padding`: 0-20 pixels
+  - `cell_gap`: 0-20 pixels
+  - `cell_font_size`: 6-24 pixels
+
+### Compact Mode
+
+For a denser display with smaller cells:
+
+```yaml
+type: custom:ha-temperature-heatmap-card
+entity: sensor.outdoor_temperature
+compact: true             # Overrides individual sizing properties
+```
+
+Compact preset values:
+- Cell height: 24px (vs 36px default)
+- Cell padding: 1px (vs 2px default)
+- Cell gap: 1px (vs 2px default)
+- Font size: 9px (vs 11px default)
+
+### Responsive Behavior
+
+On mobile screens (width < 600px), cell sizes automatically scale down by approximately 17%:
+- Default 36px height becomes 30px
+- Custom 40px height becomes 33px
+- Compact 24px height becomes 20px
+
+### Width Considerations
+
+**Responsive (recommended):**
+
+```yaml
+cell_width: "1fr"         # Auto-sizes to fill width (default)
+cell_width: "25%"         # Percentage-based responsive sizing
+```
+
+**Fixed width:**
+```yaml
+cell_width: 60            # Fixed 60px width per column
+```
+
+Note: Fixed widths may cause horizontal scrolling on narrow screens, especially with many days displayed.
+
+### Example Configurations
+
+**Larger cells for better readability:**
+```yaml
+type: custom:ha-temperature-heatmap-card
+entity: sensor.outdoor_temperature
+cell_height: 50
+cell_padding: 4
+cell_font_size: 14
+days: 5
+```
+
+**Very compact display for dashboards:**
+```yaml
+type: custom:ha-temperature-heatmap-card
+entity: sensor.outdoor_temperature
+compact: true
+days: 14
+```
+
+**Fixed width columns (may cause horizontal scroll):**
+```yaml
+type: custom:ha-temperature-heatmap-card
+entity: sensor.outdoor_temperature
+cell_width: 60
+days: 30
+```
 
 ## Using non-temperature sensor readings
 
