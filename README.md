@@ -51,6 +51,7 @@ unit: "°F"
 show_entity_name: true
 refresh_interval: 300
 click_action: tooltip
+rounded_corners: true
 color_thresholds:
   - value: 0
     color: "#1a237e"
@@ -89,6 +90,7 @@ color_thresholds:
 | `days` | number | `7` | Number of days to display (1-30) |
 | `decimals` | number | `1` | Decimal places to display: 0, 1, or 2 |
 | `end_hour` | number | `23` | End hour for display filter (0-23) |
+| `rounded_corners` | boolean | `true` | Enable rounded corners on cells (set to false for flat grid) |
 | `refresh_interval` | number | `300` | Data refresh interval in seconds |
 | `show_entity_name` | boolean | `false` | Show entity friendly name in footer |
 | `start_hour` | number | `0` | Start hour for display filter (0-23) |
