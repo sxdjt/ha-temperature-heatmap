@@ -191,7 +191,9 @@ class TemperatureHeatmapCard extends HTMLElement {
       compact: config.compact || false,
 
       // Visual options
-      rounded_corners: config.rounded_corners !== false  // Default true
+      rounded_corners: config.rounded_corners !== false,  // Default true
+      interpolate_colors: config.interpolate_colors || false,
+      color_interpolation : config.color_interpolation || 'hsl',// 'gamma', 'hsl', 'lab', 'rgb'
     };
 
     // Sort thresholds by value (ascending) - create mutable copy to avoid "read-only" errors
@@ -1085,6 +1087,196 @@ class TemperatureHeatmapCard extends HTMLElement {
     `;
   }
 
+  _interpolateRGB(c1, c2, t) {
+    const a = this._hexToRgb(c1);
+    const b = this._hexToRgb(c2);
+
+    return this._rgbToHex({
+      r: Math.round(a.r + (b.r - a.r) * t),
+      g: Math.round(a.g + (b.g - a.g) * t),
+      b: Math.round(a.b + (b.b - a.b) * t)
+    });
+  }
+  _interpolateGamma(c1, c2, t, gamma = 2.2) {
+    const a = this._hexToRgb(c1);
+    const b = this._hexToRgb(c2);
+
+    const interp = (x, y) =>
+      Math.pow(
+        Math.pow(x / 255, gamma) +
+        (Math.pow(y / 255, gamma) - Math.pow(x / 255, gamma)) * t,
+        1 / gamma
+      ) * 255;
+
+    return this._rgbToHex({
+      r: interp(a.r, b.r),
+      g: interp(a.g, b.g),
+      b: interp(a.b, b.b)
+    });
+  }
+  _interpolateHSL(c1, c2, t) {
+    const a = this._rgbToHsl(this._hexToRgb(c1));
+    const b = this._rgbToHsl(this._hexToRgb(c2));
+
+    let dh = b.h - a.h;
+    if (Math.abs(dh) > 180) dh -= Math.sign(dh) * 360;
+
+    const h = (a.h + dh * t + 360) % 360;
+    const s = a.s + (b.s - a.s) * t;
+    const l = a.l + (b.l - a.l) * t;
+
+    return this._rgbToHex(this._hslToRgb({ h, s, l }));
+  }
+  _interpolateLAB(c1, c2, t) {
+    const a = this._rgbToLab(this._hexToRgb(c1));
+    const b = this._rgbToLab(this._hexToRgb(c2));
+
+    const lab = {
+      l: a.l + (b.l - a.l) * t,
+      a: a.a + (b.a - a.a) * t,
+      b: a.b + (b.b - a.b) * t
+    };
+
+    return this._rgbToHex(this._labToRgb(lab));
+  }
+
+  _hexToRgb(hex) {
+    const cleanHex = hex.replace("#", "");
+    return {
+      r: parseInt(cleanHex.substring(0, 2), 16),
+      g: parseInt(cleanHex.substring(2, 4), 16),
+      b: parseInt(cleanHex.substring(4, 6), 16),
+    };
+  }
+  _rgbToHex({ r, g, b }) {
+    const toHex = v =>
+      Math.max(0, Math.min(255, Math.round(v)))
+        .toString(16)
+        .padStart(2, "0");
+
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  }
+
+  _rgbToHsl({ r, g, b }) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
+
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h *= 60;
+    }
+
+    return { h, s, l };
+  }
+  _hslToRgb({ h, s, l }) {
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = l - c / 2;
+    let r = 0, g = 0, b = 0;
+
+    if (h < 60) [r, g, b] = [c, x, 0];
+    else if (h < 120) [r, g, b] = [x, c, 0];
+    else if (h < 180) [r, g, b] = [0, c, x];
+    else if (h < 240) [r, g, b] = [0, x, c];
+    else if (h < 300) [r, g, b] = [x, 0, c];
+    else[r, g, b] = [c, 0, x];
+
+    return {
+      r: (r + m) * 255,
+      g: (g + m) * 255,
+      b: (b + m) * 255
+    };
+  }
+
+  _rgbToLab({ r, g, b }) {
+    const xyz = this._rgbToXyz(r, g, b);
+    const ref = [95.047, 100.0, 108.883];
+
+    let x = xyz.x / ref[0];
+    let y = xyz.y / ref[1];
+    let z = xyz.z / ref[2];
+
+    [x, y, z] = [x, y, z].map(v =>
+      v > 0.008856 ? Math.cbrt(v) : (7.787 * v) + 16 / 116
+    );
+
+    return {
+      l: (116 * y) - 16,
+      a: 500 * (x - y),
+      b: 200 * (y - z)
+    };
+  }
+  _labToRgb({ l, a, b }) {
+    let y = (l + 16) / 116;
+    let x = a / 500 + y;
+    let z = y - b / 200;
+
+    [x, y, z] = [x, y, z].map(v => {
+      const v3 = v ** 3;
+      return v3 > 0.008856 ? v3 : (v - 16 / 116) / 7.787;
+    });
+
+    x *= 95.047;
+    y *= 100.0;
+    z *= 108.883;
+
+    return this._xyzToRgb(x, y, z);
+  }
+
+  _rgbToXyz(r, g, b) {
+    [r, g, b] = [r, g, b].map((v) => {
+      v /= 255;
+      return v > 0.04045 ? Math.pow((v + 0.055) / 1.055, 2.4) : v / 12.92;
+    });
+
+    return {
+      x: (r * 0.4124 + g * 0.3576 + b * 0.1805) * 100,
+      y: (r * 0.2126 + g * 0.7152 + b * 0.0722) * 100,
+      z: (r * 0.0193 + g * 0.1192 + b * 0.9505) * 100,
+    };
+  }
+  _xyzToRgb(x, y, z) {
+    x /= 100; y /= 100; z /= 100;
+
+    let r = x * 3.2406 + y * -1.5372 + z * -0.4986;
+    let g = x * -0.9689 + y * 1.8758 + z * 0.0415;
+    let b = x * 0.0557 + y * -0.2040 + z * 1.0570;
+
+    const gamma = v =>
+      v > 0.0031308
+        ? 1.055 * Math.pow(v, 1 / 2.4) - 0.055
+        : 12.92 * v;
+
+    return {
+      r: gamma(r) * 255,
+      g: gamma(g) * 255,
+      b: gamma(b) * 255
+    };
+  }
+
+
+  _interpolateColor(color1, color2, ratio) {
+    switch (this._config.color_interpolation) {
+      case "gamma":
+        return this._interpolateGamma(color1, color2, ratio);
+      case "hsl":
+        return this._interpolateHSL(color1, color2, ratio);
+      case "lab":
+        return this._interpolateLAB(color1, color2, ratio);
+      case "rgb":
+      default:
+        return this._interpolateRGB(color1, color2, ratio);
+    }
+  }
   // Get color for temperature value based on thresholds
   _getColorForTemperature(temperature) {
     if (temperature === null || temperature === undefined) {
@@ -1092,18 +1284,48 @@ class TemperatureHeatmapCard extends HTMLElement {
     }
 
     const thresholds = this._config.color_thresholds;
-    let color = thresholds[0].color;
+    const interpolate = this._config.interpolate_colors === true;
 
-    // Find highest threshold that temperature meets or exceeds
-    for (let i = 0; i < thresholds.length; i++) {
-      if (temperature >= thresholds[i].value) {
-        color = thresholds[i].color;
-      } else {
-        break;
+    // ===== THRESHOLD MODE (legacy behavior) =====
+    if (!interpolate) {
+      let color = thresholds[0].color;
+
+      for (let i = 0; i < thresholds.length; i++) {
+        if (temperature >= thresholds[i].value) {
+          color = thresholds[i].color;
+        } else {
+          break;
+        }
+      }
+
+      return color;
+    }
+
+    // ===== INTERPOLATION MODE =====
+
+    // Below first threshold
+    if (temperature <= thresholds[0].value) {
+      return thresholds[0].color;
+    }
+
+    // Above last threshold
+    if (temperature >= thresholds[thresholds.length - 1].value) {
+      return thresholds[thresholds.length - 1].color;
+    }
+
+    // Between two thresholds
+    for (let i = 0; i < thresholds.length - 1; i++) {
+      const t1 = thresholds[i];
+      const t2 = thresholds[i + 1];
+
+      if (temperature >= t1.value && temperature <= t2.value) {
+        const ratio = (temperature - t1.value) / (t2.value - t1.value);
+
+        return this._interpolateColor(t1.color, t2.color, ratio);
       }
     }
 
-    return color;
+    return thresholds[0].color;
   }
 
   // Get contrasting text color (black or white) for background color
