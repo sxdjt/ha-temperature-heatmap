@@ -9,7 +9,9 @@ A custom Home Assistant Lovelace card that displays temperature data as a color-
 ## Features
 
 - Color-coded heatmap visualization of temperature history ( **_or any numeric sensor_** )
+- Visual configuration editor for easy setup
 - Three aggregation modes: average, minimum, and maximum
+- Color interpolation with multiple methods (RGB, HSL, LAB, Gamma)
 - Configurable card sizing: compact mode, specify cell height/width, etc.
 - Auto-detection of temperature scale (Fahrenheit/Celsius)
 - Configurable time periods (1-30 days) and intervals (1-24 hours)
@@ -52,6 +54,8 @@ show_entity_name: true
 refresh_interval: 300
 click_action: tooltip
 rounded_corners: true
+interpolate_colors: false
+color_interpolation: hsl
 color_thresholds:
   - value: 0
     color: "#1a237e"
@@ -85,9 +89,11 @@ color_thresholds:
 | `cell_padding` | number/string | `2` | Padding inside cells (0-20 pixels) |
 | `cell_width` | number/string | `"1fr"` | Column width (1fr, auto, 60px, 25%, etc.) |
 | `click_action` | string | `"tooltip"` | Cell click action: "tooltip", "more-info", or "none" |
+| `color_interpolation` | string | `"hsl"` | Interpolation method: "rgb", "gamma", "hsl", or "lab" |
 | `color_thresholds` | array | See below | Color mapping for temperatures |
 | `compact` | boolean | `false` | Enable compact mode (overrides cell sizing properties) |
 | `days` | number | `7` | Number of days to display (1-30) |
+| `interpolate_colors` | boolean | `false` | Enable smooth color interpolation between thresholds |
 | `decimals` | number | `1` | Decimal places to display: 0, 1, or 2 |
 | `end_hour` | number | `23` | End hour for display filter (0-23) |
 | `rounded_corners` | boolean | `true` | Enable rounded corners on cells (set to false for flat grid) |
@@ -151,6 +157,30 @@ color_thresholds:
   - value: 29    # Hot (red)
     color: "#f44336"
 ```
+
+## Color Interpolation
+
+By default, cell colors are determined by finding the highest threshold that the temperature meets or exceeds. This creates distinct color bands.
+
+Enable `interpolate_colors: true` to smoothly blend colors between thresholds for a gradient effect:
+
+```yaml
+type: custom:ha-temperature-heatmap-card
+entity: sensor.outdoor_temperature
+interpolate_colors: true
+color_interpolation: hsl   # Choose interpolation method
+```
+
+### Interpolation Methods
+
+| Method | Description |
+|--------|-------------|
+| `rgb` | Linear RGB interpolation - simple but can produce muddy intermediate colors |
+| `gamma` | Gamma-corrected RGB - perceptually more uniform than linear RGB |
+| `hsl` | HSL color space (default) - produces vibrant intermediate colors, takes shortest hue path |
+| `lab` | LAB color space - perceptually uniform, best for scientific visualization |
+
+**Recommendation:** Use `hsl` (default) for most cases. Use `lab` when perceptual uniformity is important.
 
 ## Time Intervals
 
