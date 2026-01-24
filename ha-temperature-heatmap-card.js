@@ -1620,7 +1620,7 @@ class TemperatureHeatmapCardEditor extends HTMLElement {
       end_hour: 23,
       aggregation_mode: 'average',
       decimals: 1,
-      unit: 'c',
+      unit: '',
       refresh_interval: 300,
       click_action: 'more-info',
       show_entity_name: false,
@@ -1633,6 +1633,7 @@ class TemperatureHeatmapCardEditor extends HTMLElement {
       rounded_corners: true,
       interpolate_colors: false,
       color_interpolation: 'hsl',
+      color_thresholds: DEFAULT_THRESHOLDS_CELSIUS.slice(),
     };
     this._config = { ...defaults, ...this._config };
 
