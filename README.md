@@ -202,26 +202,6 @@ start_hour: 8
 end_hour: 17
 ```
 
-**Display 22:00 to 05:00:**
-
-```yaml
-type: custom:ha-temperature-heatmap-card
-entity: sensor.bedroom_temperature
-time_interval: 1
-start_hour: 22
-end_hour: 5
-```
-
-**Display only the noon hour:**
-
-```yaml
-type: custom:ha-temperature-heatmap-card
-entity: sensor.outdoor_temperature
-time_interval: 1
-start_hour: 12
-end_hour: 12
-```
-
 ## Rounding
 
 The `decimals` option controls how many decimal places are shown for temperature values (0-2):
@@ -292,34 +272,6 @@ cell_width: 60            # Fixed 60px width per column
 ```
 
 Note: Fixed widths may cause horizontal scrolling on narrow screens, especially with many days displayed.
-
-### Example Configurations
-
-**Larger cells for better readability:**
-```yaml
-type: custom:ha-temperature-heatmap-card
-entity: sensor.outdoor_temperature
-cell_height: 50
-cell_padding: 4
-cell_font_size: 14
-days: 5
-```
-
-**Very compact display for dashboards:**
-```yaml
-type: custom:ha-temperature-heatmap-card
-entity: sensor.outdoor_temperature
-compact: true
-days: 14
-```
-
-**Fixed width columns (may cause horizontal scroll):**
-```yaml
-type: custom:ha-temperature-heatmap-card
-entity: sensor.outdoor_temperature
-cell_width: 60
-days: 30
-```
 
 ## Using non-temperature sensor readings
 

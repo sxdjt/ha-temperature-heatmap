@@ -1,4 +1,4 @@
-/* Last modified: 23-Jan-2026 14:30 */
+/* Last modified: 23-Jan-2026 15:45 */
 
 // Register with Home Assistant custom cards
 window.customCards = window.customCards || [];
@@ -9,7 +9,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c TEMPERATURE-HEATMAP-CARD %c v0.2.1 ',
+  '%c TEMPERATURE-HEATMAP-CARD %c v0.3.0 ',
   'color: lightblue; font-weight: bold; background: black',
   'color: white; font-weight: bold; background: dimgray'
 );

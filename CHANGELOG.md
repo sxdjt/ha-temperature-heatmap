@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-01-23
+
 ### Added
 - Visual configuration editor for easy setup (PR #2 by KiLMaN)
 - Color interpolation with multiple methods: RGB, HSL, LAB, Gamma (PR #2)
