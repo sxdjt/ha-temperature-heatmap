@@ -385,18 +385,23 @@ export class TemperatureHeatmapCard extends HTMLElement {
     console.log(`Temperature Heatmap: Starting data fetch using ${dataSource}...`);
 
     try {
-      // Calculate date range in LOCAL timezone, excluding current incomplete interval
+      // Calculate date range in LOCAL timezone, including current partial interval
       const now = new Date();
 
       let endTime;
 
+      // Calculate the current partial bucket key (only used when viewing current time)
+      let partialBucketKey = null;
+
       if (this._viewOffset === 0) {
-        // Current view: use last complete interval
-        const currentHour = now.getHours();
-        const intervalHours = this._config.time_interval;
-        const lastCompleteHour = Math.floor(currentHour / intervalHours) * intervalHours;
+        // Current view: use current time to include partial bucket data
         endTime = new Date(now);
-        endTime.setHours(lastCompleteHour, 0, 0, 0);
+
+        // Calculate which bucket is currently in progress
+        const intervalHours = this._config.time_interval;
+        const currentDateKey = getDateKey(now);
+        const currentHourBucket = getHourBucket(now.getHours(), intervalHours);
+        partialBucketKey = `${currentDateKey}_${currentHourBucket}`;
       } else {
         // Historical view: use end of the target day
         endTime = new Date(now);
@@ -410,11 +415,14 @@ export class TemperatureHeatmapCard extends HTMLElement {
       startTime.setHours(0, 0, 0, 0);  // Start of first day at midnight
 
       console.log(`Temperature Heatmap: Fetching from ${startTime.toLocaleString()} to ${endTime.toLocaleString()}`);
+      if (partialBucketKey) {
+        console.log(`Temperature Heatmap: Current partial bucket: ${partialBucketKey}`);
+      }
 
       if (dataSource === 'statistics') {
-        await this._fetchStatisticsData(startTime, endTime);
+        await this._fetchStatisticsData(startTime, endTime, partialBucketKey);
       } else {
-        await this._fetchHistoryApiData(startTime, endTime);
+        await this._fetchHistoryApiData(startTime, endTime, partialBucketKey);
       }
 
       this._lastFetch = Date.now();
@@ -444,7 +452,7 @@ export class TemperatureHeatmapCard extends HTMLElement {
   }
 
   // Fetch data using the history/period REST API (short-term states)
-  async _fetchHistoryApiData(startTime, endTime) {
+  async _fetchHistoryApiData(startTime, endTime, partialBucketKey = null) {
     const startTimeISO = startTime.toISOString();
     const endTimeISO = endTime.toISOString();
 
@@ -467,12 +475,13 @@ export class TemperatureHeatmapCard extends HTMLElement {
       temperature: result?.[0] || [],
       startTime,
       endTime,
+      partialBucketKey,
       dataSource: 'history'
     };
   }
 
   // Fetch data using the recorder/statistics_during_period WebSocket API (long-term statistics)
-  async _fetchStatisticsData(startTime, endTime) {
+  async _fetchStatisticsData(startTime, endTime, partialBucketKey = null) {
     const startTimeISO = startTime.toISOString();
     const endTimeISO = endTime.toISOString();
 
@@ -523,6 +532,7 @@ export class TemperatureHeatmapCard extends HTMLElement {
       temperature: temperatureData,
       startTime,
       endTime,
+      partialBucketKey,
       dataSource: 'statistics'
     };
   }
@@ -534,7 +544,7 @@ export class TemperatureHeatmapCard extends HTMLElement {
       return;
     }
 
-    const { temperature, startTime } = this._historyData;
+    const { temperature, startTime, partialBucketKey } = this._historyData;
     const intervalHours = this._config.time_interval;
     const rowsPerDay = 24 / intervalHours;
 
@@ -608,7 +618,8 @@ export class TemperatureHeatmapCard extends HTMLElement {
           const cell = {
             date,
             temperature: bucket?.temperature ?? null,
-            hasData: bucket && bucket.temperature !== null
+            hasData: bucket && bucket.temperature !== null,
+            isPartial: partialBucketKey && key === partialBucketKey
           };
 
           if (cell.temperature !== null) {
@@ -811,15 +822,20 @@ export class TemperatureHeatmapCard extends HTMLElement {
     const textColor = getContrastTextColor(bgColor);
     const decimals = this._config.decimals;
 
+    // Add asterisk indicator for partial (in-progress) buckets
+    const partialIndicator = cell.isPartial ? '*' : '';
+    const partialLabel = cell.isPartial ? ' (in progress)' : '';
+
     return `
-      <div class="cell"
+      <div class="cell${cell.isPartial ? ' partial' : ''}"
            style="background-color: ${bgColor}; color: ${textColor}"
            data-temperature="${cell.temperature}"
            data-date="${cell.date.toISOString()}"
+           data-partial="${cell.isPartial ? 'true' : 'false'}"
            tabindex="0"
            role="button"
-           aria-label="Temperature ${cell.temperature.toFixed(decimals)}">
-        <span class="temperature">${cell.temperature.toFixed(decimals)}</span>
+           aria-label="Temperature ${cell.temperature.toFixed(decimals)}${partialLabel}">
+        <span class="temperature">${cell.temperature.toFixed(decimals)}${partialIndicator}</span>
       </div>
     `;
   }
@@ -985,6 +1001,7 @@ export class TemperatureHeatmapCard extends HTMLElement {
   _showTooltip(cellElement) {
     const temperature = parseFloat(cellElement.dataset.temperature);
     const date = new Date(cellElement.dataset.date);
+    const isPartial = cellElement.dataset.partial === 'true';
 
     // Remove any existing tooltip
     const existing = this.shadowRoot.querySelector('.tooltip');
@@ -1003,11 +1020,13 @@ export class TemperatureHeatmapCard extends HTMLElement {
 
     const unit = this._getUnit();
     const decimals = this._config.decimals;
+    const partialNote = isPartial ? '<div><em>(in progress)</em></div>' : '';
 
     tooltip.innerHTML = `
       <div><strong>${dateStr}</strong></div>
       <div>Temperature: ${temperature.toFixed(decimals)} ${unit}</div>
       <div>Mode: ${this._config.aggregation_mode}</div>
+      ${partialNote}
     `;
 
     // Position tooltip near the cell
