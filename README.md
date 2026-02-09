@@ -48,6 +48,8 @@ time_format: "24"
 start_hour: 0
 end_hour: 23
 aggregation_mode: average
+data_source: auto
+statistic_type: mean
 decimals: 1
 unit: "°F"
 show_entity_name: true
@@ -88,10 +90,11 @@ color_thresholds:
 | `cell_height` | number/string | `36` | Cell height (10-200 pixels) |
 | `cell_padding` | number/string | `2` | Padding inside cells (0-20 pixels) |
 | `cell_width` | number/string | `"1fr"` | Column width (1fr, auto, 60px, 25%, etc.) |
-| `click_action` | string | `"tooltip"` | Cell click action: "tooltip", "more-info", or "none" |
+| `click_action` | string | `"more-info"` | Cell click action: "more-info", "tooltip", or "none" |
 | `color_interpolation` | string | `"hsl"` | Interpolation method: "rgb", "gamma", "hsl", or "lab" |
 | `color_thresholds` | array | See below | Color mapping for temperatures |
 | `compact` | boolean | `false` | Enable compact mode (overrides cell sizing properties) |
+| `data_source` | string | `"auto"` | Data source: "auto", "history", or "statistics" |
 | `days` | number | `7` | Number of days to display (1-30) |
 | `interpolate_colors` | boolean | `false` | Enable smooth color interpolation between thresholds |
 | `decimals` | number | `1` | Decimal places to display: 0, 1, or 2 |
@@ -100,6 +103,7 @@ color_thresholds:
 | `refresh_interval` | number | `300` | Data refresh interval in seconds |
 | `show_entity_name` | boolean | `false` | Show entity friendly name in footer |
 | `start_hour` | number | `0` | Start hour for display filter (0-23) |
+| `statistic_type` | string | `"mean"` | Statistic to use for statistics data: "mean", "min", or "max" |
 | `time_format` | string | `"24"` | Time format: "12" or "24" |
 | `time_interval` | number | `2` | Hours per row: 1, 2, 3, 4, 6, 8, 12, or 24 |
 | `title` | string | `"Temperature History"` | Card title |
