@@ -849,47 +849,63 @@ export class TemperatureHeatmapCard extends HTMLElement {
     const interpolate = this._config.interpolate_colors;
     const method = this._config.color_interpolation;
 
-    // Build gradient for legend bar
-    let gradientStops;
-    if (interpolate && thresholds.length >= 2) {
-      // Smooth gradient using interpolation
-      const stops = [];
-      const minVal = thresholds[0].value;
-      const maxVal = thresholds[thresholds.length - 1].value;
-      const range = maxVal - minVal;
+    const minVal = thresholds[0].value;
+    const maxVal = thresholds[thresholds.length - 1].value;
+    const range = maxVal - minVal || 1;
 
-      // Generate 20 color stops for smooth gradient
+    let gradientStops;
+
+    if (interpolate && thresholds.length >= 2) {
+      const stops = [];
+
       for (let i = 0; i <= 20; i++) {
         const t = i / 20;
         const value = minVal + t * range;
         const color = getColorForTemperature(value, thresholds, true, method);
         stops.push(`${color} ${(t * 100).toFixed(1)}%`);
       }
+
       gradientStops = stops.join(', ');
     } else {
-      // Discrete color bands
       const stops = [];
+
       for (let i = 0; i < thresholds.length; i++) {
-        const pct = (i / (thresholds.length - 1)) * 100;
-        const nextPct = ((i + 1) / (thresholds.length - 1)) * 100;
-        stops.push(`${thresholds[i].color} ${pct}%`);
+        const current = thresholds[i];
+        const pct = ((current.value - minVal) / range) * 100;
+
+        stops.push(`${current.color} ${pct.toFixed(1)}%`);
+
         if (i < thresholds.length - 1) {
-          stops.push(`${thresholds[i].color} ${nextPct}%`);
+          const next = thresholds[i + 1];
+          const nextPct = ((next.value - minVal) / range) * 100;
+
+          stops.push(`${current.color} ${nextPct.toFixed(1)}%`);
         }
       }
+
       gradientStops = stops.join(', ');
     }
 
-    // Labels at key thresholds
-    const labels = thresholds.map(t => `<span>${t.value}${unit}</span>`).join('');
+    // 🔥 FIX: scale-aware label positioning
+    const labels = thresholds.map(t => {
+      const pct = ((t.value - minVal) / range) * 100;
+      return `
+      <span style="position:absolute; left:${pct.toFixed(1)}%;">
+        ${t.value}${unit}
+      </span>
+    `;
+    }).join('');
 
     return `
-      <div class="legend">
-        <div class="legend-bar" style="background: linear-gradient(to right, ${gradientStops})"></div>
-        <div class="legend-labels">${labels}</div>
+    <div class="legend">
+      <div class="legend-bar" style="background: linear-gradient(to right, ${gradientStops})"></div>
+      <div class="legend-labels" style="position:relative;">
+        ${labels}
       </div>
-    `;
+    </div>
+  `;
   }
+
 
   // Render footer with statistics
   _renderFooter() {
