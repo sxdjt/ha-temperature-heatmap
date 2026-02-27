@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2026-02-26
+
+### Added
+- `show_degree_symbol` option (default: true) to toggle the degree symbol (°) across all
+  temperature displays: grid cells, legend, footer statistics, and tooltip
+- `show_degree_symbol` toggle added to visual editor
+
+### Fixed
+- Legend gradient color bands now positioned proportionally by actual threshold value
+  instead of evenly by count - legend now accurately represents the temperature scale (PR #5 by KiLMaN)
+- Legend labels now positioned proportionally by value to match the gradient
+- Legend label collision detection prevents overlapping text when thresholds are
+  densely spaced (e.g. default Fahrenheit thresholds at the high end)
+- Visual editor unit selector now correctly stores '°C'/'°F' instead of 'C'/'F'
+
 ## [0.5.1] - 2026-02-09
 
 ### Fixed
