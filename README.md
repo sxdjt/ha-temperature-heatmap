@@ -27,7 +27,38 @@ A custom Home Assistant Lovelace card that displays temperature data as a color-
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=sxdjt&repository=ha-temperature-heatmap)
 
-## Configuration
+## Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `entity` | string | **Required** | Temperature sensor entity ID |
+| `aggregation_mode` | string | `"average"` | Data aggregation: "average", "min", or "max" |
+| `cell_font_size` | number/string | `11` | Cell font size (6-24 pixels) |
+| `cell_gap` | number/string | `2` | Gap between cells (0-20 pixels) |
+| `cell_height` | number/string | `36` | Cell height (10-200 pixels) |
+| `cell_padding` | number/string | `2` | Padding inside cells (0-20 pixels) |
+| `cell_width` | number/string | `"1fr"` | Column width (1fr, auto, 60px, 25%, etc.) |
+| `click_action` | string | `"more-info"` | Cell click action: "more-info", "tooltip", or "none" |
+| `color_interpolation` | string | `"hsl"` | Interpolation method: "rgb", "gamma", "hsl", or "lab" |
+| `color_thresholds` | array | See below | Color mapping for temperatures |
+| `compact` | boolean | `false` | Enable compact mode (overrides cell sizing properties) |
+| `data_source` | string | `"auto"` | Data source: "auto", "history", or "statistics" |
+| `days` | number | `7` | Number of days to display (1-30) |
+| `decimals` | number | `1` | Decimal places to display: 0, 1, or 2 |
+| `end_hour` | number | `23` | End hour for display filter (0-23) |
+| `fill_gaps` | boolean | `false` | Propagate last known sensor reading when data is missing/unavailable **SEE NOTE** |
+| `interpolate_colors` | boolean | `false` | Enable smooth color interpolation between thresholds |
+| `refresh_interval` | number | `300` | Data refresh interval in seconds |
+| `rounded_corners` | boolean | `true` | Enable rounded corners on cells (set to false for flat grid) |
+| `show_entity_name` | boolean | `false` | Show entity friendly name in footer |
+| `start_hour` | number | `0` | Start hour for display filter (0-23) |
+| `statistic_type` | string | `"mean"` | Statistic to use for statistics data: "mean", "min", or "max" |
+| `time_format` | string | `"24"` | Time format: "12" or "24" |
+| `time_interval` | number | `2` | Hours per row: 1, 2, 3, 4, 6, 8, 12, or 24 |
+| `title` | string | `"Temperature History"` | Card title |
+| `unit` | string | auto-detect | Temperature unit override (e.g., "°F", "°C") |
+
+**NOTE:** `fill_gaps` will show "data" when there is none to report.  If your sensor is unavailable, the **data displayed will be incorrect** for the time slot.
 
 ### Minimal Configuration
 
@@ -42,21 +73,8 @@ entity: sensor.outdoor_temperature
 type: custom:ha-temperature-heatmap-card
 entity: sensor.outdoor_temperature
 title: "Outdoor Temperature History"
-days: 7
-time_interval: 2
-time_format: "24"
-start_hour: 0
-end_hour: 23
 aggregation_mode: average
-data_source: auto
-statistic_type: mean
-decimals: 1
-unit: "°F"
-show_entity_name: true
-refresh_interval: 300
 click_action: tooltip
-rounded_corners: true
-interpolate_colors: false
 color_interpolation: hsl
 color_thresholds:
   - value: 0
@@ -77,37 +95,21 @@ color_thresholds:
     color: "#ff9800"
   - value: 85
     color: "#f44336"
+data_source: auto
+days: 7
+decimals: 1
+end_hour: 23
+fill_gaps: false
+interpolate_colors: false
+refresh_interval: 300
+rounded_corners: true
+show_entity_name: true
+start_hour: 0
+statistic_type: mean
+time_format: "24"
+time_interval: 2
+unit: "°F"
 ```
-
-## Configuration Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `entity` | string | **Required** | Temperature sensor entity ID |
-| `aggregation_mode` | string | `"average"` | Data aggregation: "average", "min", or "max" |
-| `cell_font_size` | number/string | `11` | Cell font size (6-24 pixels) |
-| `cell_gap` | number/string | `2` | Gap between cells (0-20 pixels) |
-| `cell_height` | number/string | `36` | Cell height (10-200 pixels) |
-| `cell_padding` | number/string | `2` | Padding inside cells (0-20 pixels) |
-| `cell_width` | number/string | `"1fr"` | Column width (1fr, auto, 60px, 25%, etc.) |
-| `click_action` | string | `"more-info"` | Cell click action: "more-info", "tooltip", or "none" |
-| `color_interpolation` | string | `"hsl"` | Interpolation method: "rgb", "gamma", "hsl", or "lab" |
-| `color_thresholds` | array | See below | Color mapping for temperatures |
-| `compact` | boolean | `false` | Enable compact mode (overrides cell sizing properties) |
-| `data_source` | string | `"auto"` | Data source: "auto", "history", or "statistics" |
-| `days` | number | `7` | Number of days to display (1-30) |
-| `interpolate_colors` | boolean | `false` | Enable smooth color interpolation between thresholds |
-| `decimals` | number | `1` | Decimal places to display: 0, 1, or 2 |
-| `end_hour` | number | `23` | End hour for display filter (0-23) |
-| `rounded_corners` | boolean | `true` | Enable rounded corners on cells (set to false for flat grid) |
-| `refresh_interval` | number | `300` | Data refresh interval in seconds |
-| `show_entity_name` | boolean | `false` | Show entity friendly name in footer |
-| `start_hour` | number | `0` | Start hour for display filter (0-23) |
-| `statistic_type` | string | `"mean"` | Statistic to use for statistics data: "mean", "min", or "max" |
-| `time_format` | string | `"24"` | Time format: "12" or "24" |
-| `time_interval` | number | `2` | Hours per row: 1, 2, 3, 4, 6, 8, 12, or 24 |
-| `title` | string | `"Temperature History"` | Card title |
-| `unit` | string | auto-detect | Temperature unit override (e.g., "°F", "°C") |
 
 ## Default Color Thresholds
 
@@ -136,6 +138,7 @@ color_thresholds:
   - value: 85    # Hot (red)
     color: "#f44336"
 ```
+
 ### Celsius Scale
 
 When the sensor uses Celsius, the card automatically applies these defaults:

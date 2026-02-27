@@ -218,6 +218,12 @@ export function createStyleElement() {
       opacity: 0.9;
     }
 
+    /* Gap-filled cell: estimated value from last known reading */
+    .cell.filled {
+      opacity: 0.6;
+      border: 1px dashed currentColor;
+    }
+
     .temperature {
       font-weight: bold;
       line-height: 1.1;
@@ -337,26 +343,15 @@ export function createStyleElement() {
     }
 
     .legend-labels {
-      display: flex;
-      justify-content: space-between;
+      position: relative;
+      height: 14px;
       margin-top: 4px;
       font-size: 9px;
       color: var(--secondary-text-color);
     }
 
     .legend-labels span {
-      flex: 1;
-      text-align: center;
-      transform: translateX(-50%);
       white-space: nowrap;
-    }
-
-    .legend-labels span:first-child {
-      text-align: left;
-    }
-
-    .legend-labels span:last-child {
-      text-align: right;
     }
 
     /* Responsive adjustments */

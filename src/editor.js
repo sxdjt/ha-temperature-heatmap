@@ -55,6 +55,7 @@ export class TemperatureHeatmapCardEditor extends HTMLElement {
       color_thresholds: [],  // Empty array - editor will populate, card auto-detects if empty
       data_source: 'auto',
       statistic_type: 'mean',
+      fill_gaps: false,
     };
     this._config = { ...defaults, ...this._config };
 
@@ -103,6 +104,7 @@ export class TemperatureHeatmapCardEditor extends HTMLElement {
       { type: 'switch', key: 'rounded_corners', label: 'Rounded Corners' },
       { type: 'switch', key: 'interpolate_colors', label: 'Interpolate Colors' },
       { type: 'select', key: 'color_interpolation', label: 'Color Interpolation', options: { rgb: 'RGB', gamma: 'Gamma RGB', hsl: 'HSL', lab: 'LAB' } },
+      { type: 'switch', key: 'fill_gaps', label: 'Fill Gaps - use at your own risk (forward-fills last known value into empty buckets)' },
       { type: 'thresholds', key: 'color_thresholds', label: 'Colors' },
     ];
 

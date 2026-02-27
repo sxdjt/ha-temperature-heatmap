@@ -206,6 +206,9 @@ export class TemperatureHeatmapCard extends HTMLElement {
       // Data source options
       data_source: config.data_source || 'auto',  // 'auto', 'history', 'statistics'
       statistic_type: config.statistic_type || 'mean',  // 'mean', 'min', 'max' (for statistics data)
+
+      // Gap filling: forward-fill last known value into empty buckets (use at your own risk)
+      fill_gaps: config.fill_gaps || false,
     };
 
     // Sort thresholds by value (ascending) - create mutable copy to avoid "read-only" errors
@@ -633,6 +636,26 @@ export class TemperatureHeatmapCard extends HTMLElement {
       rows.push(row);
     }
 
+    // Optional gap filling: forward-fill the last known value into empty buckets.
+    // Filling is done per-column (day) so gaps don't propagate across day boundaries.
+    // Filled cells are marked isFilled=true for visual distinction.
+    if (this._config.fill_gaps) {
+      for (let colIndex = 0; colIndex < dates.length; colIndex++) {
+        let lastKnownTemp = null;
+        for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+          const cell = rows[rowIndex].cells[colIndex];
+          if (cell.hasData) {
+            lastKnownTemp = cell.temperature;
+          } else if (lastKnownTemp !== null) {
+            // Fill with last known value
+            cell.temperature = lastKnownTemp;
+            cell.hasData = true;
+            cell.isFilled = true;
+          }
+        }
+      }
+    }
+
     // Filter rows based on start_hour/end_hour configuration
     // This affects both display and statistics
     const filteredRows = rows.filter(row => this._shouldDisplayRow(row.hour));
@@ -826,16 +849,23 @@ export class TemperatureHeatmapCard extends HTMLElement {
     // Add asterisk indicator for partial (in-progress) buckets
     const partialIndicator = cell.isPartial ? '*' : '';
     const partialLabel = cell.isPartial ? ' (in progress)' : '';
+    const filledLabel = cell.isFilled ? ' (estimated)' : '';
+
+    // Build CSS class list
+    let cellClass = 'cell';
+    if (cell.isPartial) cellClass += ' partial';
+    if (cell.isFilled) cellClass += ' filled';
 
     return `
-      <div class="cell${cell.isPartial ? ' partial' : ''}"
+      <div class="${cellClass}"
            style="background-color: ${bgColor}; color: ${textColor}"
            data-temperature="${cell.temperature}"
            data-date="${cell.date.toISOString()}"
            data-partial="${cell.isPartial ? 'true' : 'false'}"
+           data-filled="${cell.isFilled ? 'true' : 'false'}"
            tabindex="0"
            role="button"
-           aria-label="Temperature ${cell.temperature.toFixed(decimals)}${partialLabel}">
+           aria-label="Temperature ${cell.temperature.toFixed(decimals)}${partialLabel}${filledLabel}">
         <span class="temperature">${cell.temperature.toFixed(decimals)}${partialIndicator}</span>
       </div>
     `;
@@ -1026,6 +1056,7 @@ export class TemperatureHeatmapCard extends HTMLElement {
     const temperature = parseFloat(cellElement.dataset.temperature);
     const date = new Date(cellElement.dataset.date);
     const isPartial = cellElement.dataset.partial === 'true';
+    const isFilled = cellElement.dataset.filled === 'true';
 
     // Remove any existing tooltip
     const existing = this.shadowRoot.querySelector('.tooltip');
@@ -1045,12 +1076,14 @@ export class TemperatureHeatmapCard extends HTMLElement {
     const unit = this._getUnit();
     const decimals = this._config.decimals;
     const partialNote = isPartial ? '<div><em>(in progress)</em></div>' : '';
+    const filledNote = isFilled ? '<div><em>(estimated - gap filled)</em></div>' : '';
 
     tooltip.innerHTML = `
       <div><strong>${dateStr}</strong></div>
       <div>Temperature: ${temperature.toFixed(decimals)} ${unit}</div>
       <div>Mode: ${this._config.aggregation_mode}</div>
       ${partialNote}
+      ${filledNote}
     `;
 
     // Position tooltip near the cell
