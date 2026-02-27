@@ -93,6 +93,7 @@ export class TemperatureHeatmapCardEditor extends HTMLElement {
       { type: 'select', key: 'click_action', label: 'Click Action', options: { none: 'None', 'more-info': 'More Info', tooltip: 'Tooltip' } },
       { type: 'switch', key: 'show_entity_name', label: 'Show Entity Name' },
       { type: 'switch', key: 'show_legend', label: 'Show Legend' },
+      { type: 'switch', key: 'show_degree_symbol', label: 'Show Degree Symbol (°)' },
       { type: 'number', key: 'cell_height', label: 'Cell Height', min: 10, max: 200 },
       { type: 'text', key: 'cell_width', label: 'Cell Width (px or fr)' },
       { type: 'number', key: 'cell_padding', label: 'Cell Padding', min: 0, max: 50 },

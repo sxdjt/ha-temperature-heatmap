@@ -188,6 +188,7 @@ export class TemperatureHeatmapCard extends HTMLElement {
       // Display options
       show_entity_name: config.show_entity_name || false,
       show_legend: config.show_legend || false,
+      show_degree_symbol: config.show_degree_symbol !== false,  // Default true
 
       // Cell sizing options
       cell_height: config.cell_height !== undefined ? config.cell_height : 36,
@@ -886,14 +887,17 @@ export class TemperatureHeatmapCard extends HTMLElement {
       gradientStops = stops.join(', ');
     }
 
-    // 🔥 FIX: scale-aware label positioning
+    // Scale-aware label positioning with collision detection.
+    // Labels that would render within MIN_LABEL_SPACING% of the previous
+    // visible label are skipped, preventing overlapping text on dense
+    // threshold configurations (e.g. default F thresholds at high end).
+    const MIN_LABEL_SPACING = 8; // percent of bar width
+    let lastLabelPct = -Infinity;
     const labels = thresholds.map(t => {
       const pct = ((t.value - minVal) / range) * 100;
-      return `
-      <span style="position:absolute; left:${pct.toFixed(1)}%;">
-        ${t.value}${unit}
-      </span>
-    `;
+      if (pct - lastLabelPct < MIN_LABEL_SPACING) return '';
+      lastLabelPct = pct;
+      return `<span style="position:absolute; left:${pct.toFixed(1)}%;">${t.value}${unit}</span>`;
     }).join('');
 
     return `
@@ -934,19 +938,23 @@ export class TemperatureHeatmapCard extends HTMLElement {
 
   // Get unit of measurement for temperature
   _getUnit() {
+    let unit;
+
     // Try config first
     if (this._config.unit) {
-      return this._config.unit;
+      unit = this._config.unit;
+    } else {
+      // Auto-detect from entity attributes
+      const stateObj = this._hass?.states[this._config.entity];
+      unit = stateObj?.attributes?.unit_of_measurement || '°F';
     }
 
-    // Auto-detect from entity attributes
-    const stateObj = this._hass?.states[this._config.entity];
-    if (stateObj?.attributes?.unit_of_measurement) {
-      return stateObj.attributes.unit_of_measurement;
+    // Strip degree symbol if show_degree_symbol is false
+    if (!this._config.show_degree_symbol) {
+      unit = unit.replace('°', '');
     }
 
-    // Default fallback
-    return '°F';
+    return unit;
   }
 
   // Handle all click events (event delegation)
