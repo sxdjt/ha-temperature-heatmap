@@ -347,6 +347,8 @@ export function createStyleElement() {
     .legend-labels span {
       flex: 1;
       text-align: center;
+      transform: translateX(-50%);
+      white-space: nowrap;
     }
 
     .legend-labels span:first-child {

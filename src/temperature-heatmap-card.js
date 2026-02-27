@@ -188,6 +188,7 @@ export class TemperatureHeatmapCard extends HTMLElement {
       // Display options
       show_entity_name: config.show_entity_name || false,
       show_legend: config.show_legend || false,
+      show_degree_symbol: config.show_degree_symbol !== false,  // Default true
 
       // Cell sizing options
       cell_height: config.cell_height !== undefined ? config.cell_height : 36,
@@ -849,47 +850,66 @@ export class TemperatureHeatmapCard extends HTMLElement {
     const interpolate = this._config.interpolate_colors;
     const method = this._config.color_interpolation;
 
-    // Build gradient for legend bar
-    let gradientStops;
-    if (interpolate && thresholds.length >= 2) {
-      // Smooth gradient using interpolation
-      const stops = [];
-      const minVal = thresholds[0].value;
-      const maxVal = thresholds[thresholds.length - 1].value;
-      const range = maxVal - minVal;
+    const minVal = thresholds[0].value;
+    const maxVal = thresholds[thresholds.length - 1].value;
+    const range = maxVal - minVal || 1;
 
-      // Generate 20 color stops for smooth gradient
+    let gradientStops;
+
+    if (interpolate && thresholds.length >= 2) {
+      const stops = [];
+
       for (let i = 0; i <= 20; i++) {
         const t = i / 20;
         const value = minVal + t * range;
         const color = getColorForTemperature(value, thresholds, true, method);
         stops.push(`${color} ${(t * 100).toFixed(1)}%`);
       }
+
       gradientStops = stops.join(', ');
     } else {
-      // Discrete color bands
       const stops = [];
+
       for (let i = 0; i < thresholds.length; i++) {
-        const pct = (i / (thresholds.length - 1)) * 100;
-        const nextPct = ((i + 1) / (thresholds.length - 1)) * 100;
-        stops.push(`${thresholds[i].color} ${pct}%`);
+        const current = thresholds[i];
+        const pct = ((current.value - minVal) / range) * 100;
+
+        stops.push(`${current.color} ${pct.toFixed(1)}%`);
+
         if (i < thresholds.length - 1) {
-          stops.push(`${thresholds[i].color} ${nextPct}%`);
+          const next = thresholds[i + 1];
+          const nextPct = ((next.value - minVal) / range) * 100;
+
+          stops.push(`${current.color} ${nextPct.toFixed(1)}%`);
         }
       }
+
       gradientStops = stops.join(', ');
     }
 
-    // Labels at key thresholds
-    const labels = thresholds.map(t => `<span>${t.value}${unit}</span>`).join('');
+    // Scale-aware label positioning with collision detection.
+    // Labels that would render within MIN_LABEL_SPACING% of the previous
+    // visible label are skipped, preventing overlapping text on dense
+    // threshold configurations (e.g. default F thresholds at high end).
+    const MIN_LABEL_SPACING = 8; // percent of bar width
+    let lastLabelPct = -Infinity;
+    const labels = thresholds.map(t => {
+      const pct = ((t.value - minVal) / range) * 100;
+      if (pct - lastLabelPct < MIN_LABEL_SPACING) return '';
+      lastLabelPct = pct;
+      return `<span style="position:absolute; left:${pct.toFixed(1)}%;">${t.value}${unit}</span>`;
+    }).join('');
 
     return `
-      <div class="legend">
-        <div class="legend-bar" style="background: linear-gradient(to right, ${gradientStops})"></div>
-        <div class="legend-labels">${labels}</div>
+    <div class="legend">
+      <div class="legend-bar" style="background: linear-gradient(to right, ${gradientStops})"></div>
+      <div class="legend-labels" style="position:relative;">
+        ${labels}
       </div>
-    `;
+    </div>
+  `;
   }
+
 
   // Render footer with statistics
   _renderFooter() {
@@ -918,19 +938,23 @@ export class TemperatureHeatmapCard extends HTMLElement {
 
   // Get unit of measurement for temperature
   _getUnit() {
+    let unit;
+
     // Try config first
     if (this._config.unit) {
-      return this._config.unit;
+      unit = this._config.unit;
+    } else {
+      // Auto-detect from entity attributes
+      const stateObj = this._hass?.states[this._config.entity];
+      unit = stateObj?.attributes?.unit_of_measurement || '°F';
     }
 
-    // Auto-detect from entity attributes
-    const stateObj = this._hass?.states[this._config.entity];
-    if (stateObj?.attributes?.unit_of_measurement) {
-      return stateObj.attributes.unit_of_measurement;
+    // Strip degree symbol if show_degree_symbol is false
+    if (!this._config.show_degree_symbol) {
+      unit = unit.replace('°', '');
     }
 
-    // Default fallback
-    return '°F';
+    return unit;
   }
 
   // Handle all click events (event delegation)
