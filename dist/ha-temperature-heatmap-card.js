@@ -1,3 +1,2391 @@
-/* Last modified: 27-Feb-2026 23:50 */
-const e=[{value:0,color:"#1a237e"},{value:32,color:"#42a5f5"},{value:40,color:"#80deea"},{value:50,color:"#66bb6a"},{value:60,color:"#4caf50"},{value:70,color:"#81c784"},{value:75,color:"#ffeb3b"},{value:80,color:"#ff9800"},{value:85,color:"#f44336"}],t=[{value:-18,color:"#1a237e"},{value:0,color:"#42a5f5"},{value:4,color:"#80deea"},{value:10,color:"#66bb6a"},{value:16,color:"#4caf50"},{value:21,color:"#81c784"},{value:24,color:"#ffeb3b"},{value:27,color:"#ff9800"},{value:29,color:"#f44336"}];function n(e){if(e.startsWith("#")){const t=e.replace("#","");if(6===t.length)return{r:parseInt(t.substr(0,2),16),g:parseInt(t.substr(2,2),16),b:parseInt(t.substr(4,2),16)}}if(e.startsWith("rgba(")){const t=e.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);if(t)return{r:parseInt(t[1],10),g:parseInt(t[2],10),b:parseInt(t[3],10)}}if(e.startsWith("rgb(")){const t=e.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);if(t)return{r:parseInt(t[1],10),g:parseInt(t[2],10),b:parseInt(t[3],10)}}return null}function i(e){const t=e=>Math.max(0,Math.min(255,Math.round(e))).toString(16).padStart(2,"0");return`#${t(e.r)}${t(e.g)}${t(e.b)}`}function a(e){const t=e.r/255,n=e.g/255,i=e.b/255,a=Math.max(t,n,i),r=Math.min(t,n,i);let o=0,s=0;const l=(a+r)/2;if(a!==r){const e=a-r;switch(s=l>.5?e/(2-a-r):e/(a+r),a){case t:o=(n-i)/e+(n<i?6:0);break;case n:o=(i-t)/e+2;break;case i:o=(t-n)/e+4}o*=60}return{h:o,s:s,l:l}}function r(e,t,n){const r=a(e),o=a(t);let s=o.h-r.h;Math.abs(s)>180&&(s-=360*Math.sign(s));return i(function(e){const{h:t,s:n,l:i}=e,a=(1-Math.abs(2*i-1))*n,r=a*(1-Math.abs(t/60%2-1)),o=i-a/2;let s=0,l=0,c=0;return[s,l,c]=t<60?[a,r,0]:t<120?[r,a,0]:t<180?[0,a,r]:t<240?[0,r,a]:t<300?[r,0,a]:[a,0,r],{r:255*(s+o),g:255*(l+o),b:255*(c+o)}}({h:(r.h+s*n+360)%360,s:r.s+(o.s-r.s)*n,l:r.l+(o.l-r.l)*n}))}function o(e){const t=(n=e.r,i=e.g,a=e.b,[n,i,a]=[n,i,a].map(e=>(e/=255)>.04045?Math.pow((e+.055)/1.055,2.4):e/12.92),{x:100*(.4124*n+.3576*i+.1805*a),y:100*(.2126*n+.7152*i+.0722*a),z:100*(.0193*n+.1192*i+.9505*a)});var n,i,a;const r=[95.047,100,108.883];let o=t.x/r[0],s=t.y/r[1],l=t.z/r[2];return[o,s,l]=[o,s,l].map(e=>e>.008856?Math.cbrt(e):7.787*e+16/116),{l:116*s-16,a:500*(o-s),b:200*(s-l)}}function s(e){let t=(e.l+16)/116,n=e.a/500+t,i=t-e.b/200;return[n,t,i]=[n,t,i].map(e=>{const t=e**3;return t>.008856?t:(e-16/116)/7.787}),n*=95.047,t*=100,i*=108.883,function(e,t,n){let i=-.9689*(e/=100)+1.8758*(t/=100)+.0415*(n/=100),a=.0557*e+-.204*t+1.057*n;const r=e=>e>.0031308?1.055*Math.pow(e,1/2.4)-.055:12.92*e;return{r:255*r(3.2406*e+-1.5372*t+-.4986*n),g:255*r(i),b:255*r(a)}}(n,t,i)}function l(e,t,a,l="hsl"){const c=n(e),d=n(t);if(!c||!d)return e;switch(l){case"rgb":return function(e,t,n){return i({r:Math.round(e.r+(t.r-e.r)*n),g:Math.round(e.g+(t.g-e.g)*n),b:Math.round(e.b+(t.b-e.b)*n)})}(c,d,a);case"gamma":return function(e,t,n,a=2.2){const r=(e,t)=>255*Math.pow(Math.pow(e/255,a)+(Math.pow(t/255,a)-Math.pow(e/255,a))*n,1/a);return i({r:r(e.r,t.r),g:r(e.g,t.g),b:r(e.b,t.b)})}(c,d,a);case"hsl":default:return r(c,d,a);case"lab":return function(e,t,n){const a=o(e),r=o(t);return i(s({l:a.l+(r.l-a.l)*n,a:a.a+(r.a-a.a)*n,b:a.b+(r.b-a.b)*n}))}(c,d,a)}}function c(e,t,n=!1,i="hsl"){if(null==e)return"var(--disabled-color, #f0f0f0)";if(!n){let n=t[0].color;for(let i=0;i<t.length&&e>=t[i].value;i++)n=t[i].color;return n}if(e<=t[0].value)return t[0].color;if(e>=t[t.length-1].value)return t[t.length-1].color;for(let n=0;n<t.length-1;n++)if(e>=t[n].value&&e<t[n+1].value){const a=(e-t[n].value)/(t[n+1].value-t[n].value);return l(t[n].color,t[n+1].color,a,i)}return t[t.length-1].color}function d(e){const t=document.createElement("div");return t.textContent=e,t.innerHTML}function h(e,t="24"){if("24"===t)return String(e).padStart(2,"0");return`${0===e?12:e>12?e-12:e}${e<12?"a":"p"}`}function p(e,t){return null==e||""===e?t:"number"==typeof e?`${e}px`:String(e)}function u(e){return`${e.getFullYear()}-${String(e.getMonth()+1).padStart(2,"0")}-${String(e.getDate()).padStart(2,"0")}`}function g(e,t){return Math.floor(e/t)*t}class m extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this._config={},this._hass=null,this._historyData=null,this._processedData=null,this._lastFetch=0,this._viewOffset=0,this._isLoading=!1,this._error=null,this._interval=null,this.shadowRoot.appendChild(function(){const e=document.createElement("style");return e.textContent="\n    /* Main container */\n    ha-card {\n      display: block;\n      padding: 0;\n      overflow: hidden;\n    }\n\n    /* Card header with title and navigation */\n    .card-header {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      padding: 16px;\n      border-bottom: 1px solid var(--divider-color);\n      flex-wrap: wrap;\n      gap: 8px;\n    }\n\n    .title {\n      font-size: 20px;\n      font-weight: 500;\n      color: var(--primary-text-color);\n    }\n\n    /* Navigation controls */\n    .nav-controls {\n      display: flex;\n      align-items: center;\n      gap: 12px;\n    }\n\n    .nav-btn {\n      background: var(--primary-color);\n      color: var(--text-primary-color, white);\n      border: none;\n      border-radius: 4px;\n      width: 32px;\n      height: 32px;\n      font-size: 18px;\n      cursor: pointer;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      transition: opacity 0.2s ease;\n    }\n\n    .nav-btn:hover:not(:disabled) {\n      opacity: 0.8;\n    }\n\n    .nav-btn:disabled {\n      opacity: 0.3;\n      cursor: not-allowed;\n    }\n\n    .nav-btn:focus {\n      outline: 2px solid var(--primary-color);\n      outline-offset: 2px;\n    }\n\n    .nav-btn-current {\n      background: var(--primary-color);\n      color: var(--text-primary-color, white);\n      border: none;\n      border-radius: 4px;\n      padding: 6px 12px;\n      font-size: 13px;\n      font-weight: 500;\n      cursor: pointer;\n      transition: opacity 0.2s ease;\n    }\n\n    .nav-btn-current:hover {\n      opacity: 0.8;\n    }\n\n    .nav-btn-current:focus {\n      outline: 2px solid var(--primary-color);\n      outline-offset: 2px;\n    }\n\n    .nav-btn-current.hidden {\n      visibility: hidden;\n      pointer-events: none;\n    }\n\n    .date-range {\n      font-size: 14px;\n      color: var(--secondary-text-color);\n      min-width: 120px;\n      text-align: center;\n    }\n\n    /* Heatmap grid container */\n    .heatmap-grid {\n      padding: 16px;\n    }\n\n    .month-header {\n      text-align: center;\n      font-size: 16px;\n      font-weight: 500;\n      color: var(--primary-text-color);\n      margin-bottom: 12px;\n    }\n\n    /* Grid wrapper with time labels and data grid */\n    .grid-wrapper {\n      display: grid;\n      grid-template-columns: auto 1fr;\n      gap: 8px;\n      align-items: start;\n    }\n\n    /* Time labels column */\n    .time-labels {\n      display: flex;\n      flex-direction: column;\n      gap: var(--cell-gap, 2px);\n      padding-top: 28px;  /* Align with data grid (after date headers) */\n    }\n\n    .time-label {\n      height: var(--cell-height, 36px);\n      display: flex;\n      align-items: center;\n      justify-content: flex-end;\n      padding-right: 8px;\n      font-size: var(--cell-font-size, 11px);\n      color: var(--secondary-text-color);\n      font-weight: 500;\n    }\n\n    /* Data grid container */\n    .data-grid-container {\n      display: flex;\n      flex-direction: column;\n      gap: 4px;\n    }\n\n    /* Date headers row */\n    .date-headers {\n      display: grid;\n      grid-template-columns: repeat(var(--days-count, 7), 1fr);\n      gap: 2px;\n      margin-bottom: 4px;\n    }\n\n    .date-header {\n      text-align: center;\n      font-weight: bold;\n      font-size: 12px;\n      color: var(--primary-text-color);\n      padding: 4px;\n    }\n\n    /* Data cells grid */\n    .data-grid {\n      display: grid;\n      grid-template-columns: repeat(var(--days-count, 7), var(--cell-width, 1fr));\n      grid-auto-rows: var(--cell-height, 36px);\n      gap: var(--cell-gap, 2px);\n    }\n\n    /* Individual cells */\n    .cell {\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: center;\n      border-radius: var(--cell-border-radius, 4px);\n      cursor: pointer;\n      transition: transform 0.1s ease, box-shadow 0.1s ease;\n      position: relative;\n      font-size: var(--cell-font-size, 11px);\n      padding: var(--cell-padding, 2px);\n      box-sizing: border-box;\n    }\n\n    /* Only apply hover effects on devices with a true hover-capable pointer.\n       On touch devices, :hover is sticky after tap and can cause the cell to\n       render on top of the more-info popup due to the transform stacking context. */\n    @media (hover: hover) {\n      .cell:hover:not(.no-data) {\n        transform: scale(1.08);\n        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);\n        z-index: 10;\n      }\n\n      .cell.no-data:hover {\n        transform: none;\n        box-shadow: none;\n      }\n    }\n\n    .cell:focus {\n      outline: 2px solid var(--primary-color);\n      outline-offset: 2px;\n    }\n\n    .cell.no-data {\n      background-color: var(--disabled-color, #f0f0f0);\n      cursor: default;\n      opacity: 0.4;\n    }\n\n    .cell.partial {\n      border: 2px dashed currentColor;\n      opacity: 0.9;\n    }\n\n    /* Gap-filled cell: estimated value from last known reading */\n    .cell.filled {\n      opacity: 0.6;\n      border: 1px dashed currentColor;\n    }\n\n    .temperature {\n      font-weight: bold;\n      line-height: 1.1;\n    }\n\n    /* Footer with statistics */\n    .footer {\n      display: flex;\n      flex-direction: column;\n      gap: 8px;\n      padding: 12px 16px;\n      border-top: 1px solid var(--divider-color);\n      background: var(--card-background-color);\n      font-size: 13px;\n      color: var(--secondary-text-color);\n    }\n\n    .footer-stats {\n      display: flex;\n      justify-content: space-around;\n      align-items: center;\n    }\n\n    .footer-stats span {\n      font-weight: 500;\n    }\n\n    .entity-name {\n      text-align: center;\n      font-size: 11px;\n      color: var(--secondary-text-color);\n      opacity: 0.8;\n    }\n\n    /* Loading state */\n    .loading {\n      text-align: center;\n      padding: 32px;\n      color: var(--secondary-text-color);\n    }\n\n    .loading-spinner {\n      display: inline-block;\n      width: 24px;\n      height: 24px;\n      border: 3px solid var(--divider-color);\n      border-top-color: var(--primary-color);\n      border-radius: 50%;\n      animation: spin 1s linear infinite;\n    }\n\n    @keyframes spin {\n      to { transform: rotate(360deg); }\n    }\n\n    /* Error message */\n    .error-message {\n      display: flex;\n      align-items: flex-start;\n      gap: 12px;\n      padding: 16px;\n      margin: 16px;\n      background: rgba(244, 67, 54, 0.1);\n      color: var(--error-color, #f44336);\n      border-radius: 4px;\n      border-left: 4px solid var(--error-color, #f44336);\n    }\n\n    .error-icon {\n      font-size: 20px;\n      flex-shrink: 0;\n    }\n\n    .error-text {\n      flex: 1;\n    }\n\n    .error-details {\n      font-size: 11px;\n      margin-top: 4px;\n      opacity: 0.8;\n    }\n\n    /* Tooltip */\n    .tooltip {\n      position: absolute;\n      z-index: 1000;\n      background: var(--card-background-color, white);\n      border: 1px solid var(--divider-color);\n      border-radius: 4px;\n      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);\n      padding: 8px 12px;\n      font-size: 12px;\n      pointer-events: none;\n      max-width: 250px;\n      line-height: 1.4;\n    }\n\n    .tooltip div {\n      margin: 2px 0;\n    }\n\n    .tooltip strong {\n      color: var(--primary-text-color);\n    }\n\n    /* Legend bar */\n    .legend {\n      padding: 8px 16px 12px;\n      border-top: 1px solid var(--divider-color);\n    }\n\n    .legend-bar {\n      height: 12px;\n      border-radius: 3px;\n      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);\n    }\n\n    .legend-labels {\n      position: relative;\n      height: 14px;\n      margin-top: 4px;\n      font-size: 9px;\n      color: var(--secondary-text-color);\n    }\n\n    .legend-labels span {\n      white-space: nowrap;\n    }\n\n    /* Compact header: reduces padding, title size, and nav arrow size */\n    .compact-header .card-header {\n      padding: 4px 8px;\n      gap: 4px;\n    }\n\n    .compact-header .title {\n      font-size: 14px;\n    }\n\n    .compact-header .nav-btn {\n      width: 20px;\n      height: 20px;\n      font-size: 12px;\n    }\n\n    .compact-header .nav-btn-current {\n      padding: 2px 6px;\n      font-size: 11px;\n    }\n\n    .compact-header .month-header {\n      font-size: 13px;\n      margin-bottom: 4px;\n      padding: 2px 0;\n    }\n\n    .compact-header .footer {\n      padding: 6px 8px;\n      gap: 4px;\n      font-size: 11px;\n    }\n\n    /* Responsive adjustments */\n    @media (max-width: 600px) {\n      .data-grid {\n        grid-auto-rows: calc(var(--cell-height, 36px) * 0.83);\n      }\n\n      .time-label {\n        height: calc(var(--cell-height, 36px) * 0.83);\n        font-size: calc(var(--cell-font-size, 11px) * 0.91);\n      }\n\n      .cell {\n        font-size: calc(var(--cell-font-size, 11px) * 0.91);\n      }\n\n      .date-header {\n        font-size: 11px;\n      }\n    }\n\n    @media (max-width: 400px) {\n      .card-header {\n        flex-direction: column;\n        align-items: stretch;\n      }\n\n      .nav-controls {\n        justify-content: center;\n      }\n    }\n\n    /* Accessibility: High contrast mode support */\n    @media (prefers-contrast: high) {\n      .cell:not(.no-data) {\n        border: 1px solid currentColor;\n      }\n    }\n\n    /* Accessibility: Reduced motion support */\n    @media (prefers-reduced-motion: reduce) {\n      .cell,\n      .nav-btn,\n      .loading-spinner {\n        transition: none;\n        animation: none;\n      }\n    }\n  ",e}()),this._content=document.createElement("ha-card"),this.shadowRoot.appendChild(this._content),this._content.addEventListener("click",this._handleClick.bind(this)),this._responseCache=new Map}setConfig(e){if(!e.entity)throw new Error("'entity' is required (temperature sensor)");const t=[1,2,3,4,6,8,12,24];if(e.time_interval&&!t.includes(e.time_interval))throw new Error(`time_interval must be one of: ${t.join(", ")}`);if(e.days&&(e.days<1||e.days>30))throw new Error("days must be between 1 and 30");const n=["average","min","max"];if(e.aggregation_mode&&!n.includes(e.aggregation_mode))throw new Error(`aggregation_mode must be one of: ${n.join(", ")}`);const i=["rgb","gamma","hsl","lab"];if(e.color_interpolation&&!i.includes(e.color_interpolation))throw new Error(`color_interpolation must be one of: ${i.join(", ")}`);const a=["auto","history","statistics"];if(e.data_source&&!a.includes(e.data_source))throw new Error(`data_source must be one of: ${a.join(", ")}`);const r=["mean","min","max"];if(e.statistic_type&&!r.includes(e.statistic_type))throw new Error(`statistic_type must be one of: ${r.join(", ")}`);if(void 0!==e.decimals&&(e.decimals<0||e.decimals>2))throw new Error("decimals must be between 0 and 2");if(void 0!==e.start_hour&&(!Number.isInteger(e.start_hour)||e.start_hour<0||e.start_hour>23))throw new Error("start_hour must be an integer between 0 and 23");if(void 0!==e.end_hour&&(!Number.isInteger(e.end_hour)||e.end_hour<0||e.end_hour>23))throw new Error("end_hour must be an integer between 0 and 23");if(void 0!==e.cell_height){const t="number"==typeof e.cell_height?e.cell_height:parseFloat(e.cell_height);if(isNaN(t)||t<10||t>200)throw new Error("cell_height must be between 10 and 200 pixels")}if(void 0!==e.cell_padding){const t="number"==typeof e.cell_padding?e.cell_padding:parseFloat(e.cell_padding);if(isNaN(t)||t<0||t>20)throw new Error("cell_padding must be between 0 and 20 pixels")}if(void 0!==e.cell_gap){const t="number"==typeof e.cell_gap?e.cell_gap:parseFloat(e.cell_gap);if(isNaN(t)||t<0||t>20)throw new Error("cell_gap must be between 0 and 20 pixels")}if(void 0!==e.cell_font_size){const t="number"==typeof e.cell_font_size?e.cell_font_size:parseFloat(e.cell_font_size);if(isNaN(t)||t<6||t>24)throw new Error("cell_font_size must be between 6 and 24 pixels")}if(void 0!==e.cell_width&&"string"!=typeof e.cell_width){const t=parseFloat(e.cell_width);if(isNaN(t)||t<10||t>500)throw new Error("cell_width as number must be between 10 and 500 pixels")}this._config={entity:e.entity,title:e.title||"Temperature History",days:e.days||7,time_interval:e.time_interval||2,time_format:e.time_format||"24",start_hour:void 0!==e.start_hour?e.start_hour:0,end_hour:void 0!==e.end_hour?e.end_hour:23,aggregation_mode:e.aggregation_mode||"average",decimals:void 0!==e.decimals?e.decimals:1,unit:e.unit||null,color_thresholds:e.color_thresholds&&e.color_thresholds.length>0?e.color_thresholds:this._getDefaultThresholds(),refresh_interval:e.refresh_interval||300,click_action:e.click_action||"more-info",show_entity_name:e.show_entity_name||!1,show_legend:e.show_legend||!1,show_degree_symbol:!1!==e.show_degree_symbol,cell_height:void 0!==e.cell_height?e.cell_height:36,cell_width:void 0!==e.cell_width?e.cell_width:"1fr",cell_padding:void 0!==e.cell_padding?e.cell_padding:2,cell_gap:void 0!==e.cell_gap?e.cell_gap:2,cell_font_size:void 0!==e.cell_font_size?e.cell_font_size:11,compact:e.compact||!1,rounded_corners:!1!==e.rounded_corners,interpolate_colors:e.interpolate_colors||!1,color_interpolation:e.color_interpolation||"hsl",data_source:e.data_source||"auto",statistic_type:e.statistic_type||"mean",fill_gaps:e.fill_gaps||!1,compact_header:e.compact_header||!1},this._config.color_thresholds=[...this._config.color_thresholds].sort((e,t)=>e.value-t.value),this._hass&&this._clearAndSetInterval()}static getConfigElement(){return document.createElement("ha-temperature-heatmap-card-editor")}static getStubConfig(n){const i=Object.keys(n.states).filter(e=>{if(!e.startsWith("sensor."))return!1;const t=n.states[e];return"temperature"===t?.attributes?.device_class});let a=e.slice();if(i.length>0){const e=n.states[i[0]]?.attributes?.unit_of_measurement||"";(e.toLowerCase().includes("c")||"°C"===e)&&(a=t.slice())}return{entity:i.length>0?i[0]:"",title:"Temperature History",days:7,time_interval:2,aggregation_mode:"average",color_thresholds:a}}_getDefaultThresholds(){return function(n){if(!n)return e;const i=n.toLowerCase().trim();return i.includes("c")||"°c"===i||"celsius"===i?t:e}(this._getUnit().toLowerCase())}set hass(e){this._hass=e,this._config&&this.isConnected&&0===this._viewOffset&&this._isDataStale()&&this._fetchHistoryData()}getCardSize(){const e=this._processedData?this._processedData.rows.length:12,t=this._getEffectiveSizing(),n=parseFloat(t.cellHeight)||36;return Math.ceil((e*n+100)/50)}connectedCallback(){this._config&&this._hass&&this._clearAndSetInterval()}disconnectedCallback(){this._interval&&(clearInterval(this._interval),this._interval=null)}_clearAndSetInterval(){this._interval&&(clearInterval(this._interval),this._interval=null),this._fetchHistoryData();const e=1e3*this._config.refresh_interval;this._interval=setInterval(()=>{0===this._viewOffset&&this._fetchHistoryData()},e)}_isDataStale(){if(!this._historyData||!this._lastFetch)return!0;return Date.now()-this._lastFetch>1e3*this._config.refresh_interval}async fetchWithCache(e,t=3e4,n=3e5){const i=Date.now(),a=`${e}_offset${this._viewOffset}`,r=this._responseCache.get(a);if(r&&r.expiry>i)return console.log("Using cached data for:",a),r.data;const o=this._hass.callApi("GET",e),s=await Promise.race([o,new Promise((e,n)=>setTimeout(()=>n(new Error(`Request timeout after ${t}ms`)),t))]);return this._responseCache.set(a,{data:s,expiry:i+n}),s}_getDataSource(){const e=this._config.data_source;return"history"===e?"history":"statistics"===e||this._viewOffset<0?"statistics":"history"}async _fetchHistoryData(){if(this._isLoading)return void console.log("Temperature Heatmap: Already loading, skipping duplicate fetch");this._isLoading=!0,this._error=null,this._render();const e=this._getDataSource();console.log(`Temperature Heatmap: Starting data fetch using ${e}...`);try{const t=new Date;let n,i=null;if(0===this._viewOffset){n=new Date(t);const e=this._config.time_interval,a=u(t);i=`${a}_${g(t.getHours(),e)}`}else n=new Date(t),n.setDate(n.getDate()+this._viewOffset),n.setHours(23,59,59,999);const a=new Date(n);a.setDate(a.getDate()-this._config.days+1),a.setHours(0,0,0,0),console.log(`Temperature Heatmap: Fetching from ${a.toLocaleString()} to ${n.toLocaleString()}`),i&&console.log(`Temperature Heatmap: Current partial bucket: ${i}`),"statistics"===e?await this._fetchStatisticsData(a,n,i):await this._fetchHistoryApiData(a,n,i),this._lastFetch=Date.now();const r=Date.now();this._processData();const o=((Date.now()-r)/1e3).toFixed(2);console.log(`Temperature Heatmap: Processed data in ${o}s`),this._isLoading=!1,console.log("Temperature Heatmap: Starting render..."),this._render(),console.log("Temperature Heatmap: Render complete")}catch(e){console.error("Temperature Heatmap: Fetch error:",e),this._isLoading=!1,this._error={message:"Failed to fetch temperature history",details:e.message},this._render()}}async _fetchHistoryApiData(e,t,n=null){const i=e.toISOString(),a=t.toISOString();console.log(`Temperature Heatmap: Using history API - Start: ${i}, End: ${a}`);const r=`history/period/${i}?filter_entity_id=${this._config.entity}&end_time=${a}&minimal_response&no_attributes`,o=Date.now(),s=await this.fetchWithCache(r),l=((Date.now()-o)/1e3).toFixed(1);console.log(`Temperature Heatmap: Received ${s?.[0]?.length||0} temperature points in ${l}s`),this._historyData={temperature:s?.[0]||[],startTime:e,endTime:t,partialBucketKey:n,dataSource:"history"}}async _fetchStatisticsData(e,t,n=null){const i=e.toISOString(),a=t.toISOString();console.log(`Temperature Heatmap: Using statistics API - Start: ${i}, End: ${a}`);const r=Date.now(),o=await((e,t=3e4)=>Promise.race([e,new Promise((e,n)=>setTimeout(()=>n(new Error("Request timeout after 30 seconds")),t))]))(this._hass.callWS({type:"recorder/statistics_during_period",start_time:i,end_time:a,statistic_ids:[this._config.entity],period:"hour"})),s=((Date.now()-r)/1e3).toFixed(1),l=o[this._config.entity]||[];console.log(`Temperature Heatmap: Received ${l.length} temperature stats in ${s}s`);const c=this._config.statistic_type,d=l.map(e=>({last_changed:e.start,state:String(e[c]??e.mean??"")})).filter(e=>""!==e.state&&"null"!==e.state);this._historyData={temperature:d,startTime:e,endTime:t,partialBucketKey:n,dataSource:"statistics"}}_processData(){if(!this._historyData)return void(this._processedData=null);const{temperature:e,startTime:t,partialBucketKey:n}=this._historyData,i=this._config.time_interval,a=24/i,r={};e.forEach(e=>{const t=new Date(e.last_changed||e.last_updated),n=`${u(t)}_${g(t.getHours(),i)}`;r[n]||(r[n]={sum:0,count:0,min:null,max:null});const a=parseFloat(e.state);isNaN(a)||(r[n].sum+=a,r[n].count+=1,r[n].min=null===r[n].min?a:Math.min(r[n].min,a),r[n].max=null===r[n].max?a:Math.max(r[n].max,a))}),Object.keys(r).forEach(e=>{const t=r[e];if(t.count>0)switch(this._config.aggregation_mode){case"min":t.temperature=t.min;break;case"max":t.temperature=t.max;break;default:t.temperature=t.sum/t.count}else t.temperature=null});const o=[];for(let e=0;e<this._config.days;e++){const n=new Date(t);n.setDate(n.getDate()+e),o.push(n)}const s=[];let l=[];for(let e=0;e<a;e++){const t=e*i,a={hour:t,label:h(t,this._config.time_format),cells:o.map(e=>{const i=`${u(e)}_${t}`,a=r[i],o={date:e,temperature:a?.temperature??null,hasData:a&&null!==a.temperature,isPartial:n&&i===n};return null!==o.temperature&&l.push(o.temperature),o})};s.push(a)}if(this._config.fill_gaps)for(let e=0;e<o.length;e++){let t=null;for(let n=0;n<s.length;n++){const i=s[n].cells[e];i.hasData?t=i.temperature:null!==t&&(i.temperature=t,i.hasData=!0,i.isFilled=!0)}}const c=s.filter(e=>this._shouldDisplayRow(e.hour));l=[],c.forEach(e=>{e.cells.forEach(e=>{null!==e.temperature&&l.push(e.temperature)})});const d={min:l.length>0?Math.min(...l):0,max:l.length>0?Math.max(...l):0,avg:l.length>0?l.reduce((e,t)=>e+t,0)/l.length:0};this._processedData={rows:c,dates:o,stats:d}}_shouldDisplayRow(e){const t=this._config.start_hour,n=this._config.end_hour;return t<=n?e>=t&&e<=n:e>=t||e<=n}_render(){if(this._config&&this._hass&&(this._content.innerHTML=`\n      <div class="card-header">\n        <span class="title">${d(this._config.title)}</span>\n        ${this._renderNavControls()}\n      </div>\n\n      ${this._error?this._renderError():""}\n      ${this._isLoading?this._renderLoading():""}\n      ${this._processedData&&!this._error?this._renderGrid():""}\n      ${this._processedData&&!this._error&&this._config.show_legend?this._renderLegend():""}\n      ${this._processedData&&!this._error?this._renderFooter():""}\n    `,this._content.classList.toggle("compact-header",!!this._config.compact_header),this._processedData)){this._content.style.setProperty("--days-count",this._config.days);const e=this._getEffectiveSizing();this._content.style.setProperty("--cell-height",e.cellHeight),this._content.style.setProperty("--cell-width",e.cellWidth),this._content.style.setProperty("--cell-padding",e.cellPadding),this._content.style.setProperty("--cell-gap",e.cellGap),this._content.style.setProperty("--cell-font-size",e.cellFontSize),this._content.style.setProperty("--cell-border-radius",this._config.rounded_corners?"4px":"0")}}_renderNavControls(){const e=this._viewOffset<0,t=this._viewOffset<0;return`\n      <div class="nav-controls">\n        <button class="nav-btn" data-direction="back" aria-label="Previous period">&larr;</button>\n        <span class="date-range">${this._getDateRangeLabel()}</span>\n        <button class="nav-btn" data-direction="forward"\n                ${e?"":"disabled"}\n                aria-label="Next period">&rarr;</button>\n        <button class="nav-btn-current ${t?"":"hidden"}"\n                data-direction="current"\n                aria-label="Jump to current"\n                ${t?"":'aria-hidden="true"'}>Current</button>\n      </div>\n    `}_getDateRangeLabel(){if(!this._processedData)return"";const{dates:e}=this._processedData,t=e[0],n=e[e.length-1],i={month:"short",day:"numeric"};return`${t.toLocaleDateString(void 0,i)} - ${n.toLocaleDateString(void 0,i)}`}_renderLoading(){return'\n      <div class="loading">\n        <div class="loading-spinner"></div>\n        <div style="margin-top: 8px;">Loading temperature data...</div>\n      </div>\n    '}_renderError(){return`\n      <div class="error-message">\n        <div class="error-icon">!</div>\n        <div class="error-text">\n          <strong>${d(this._error.message)}</strong>\n          <div class="error-details">${d(this._error.details)}</div>\n        </div>\n      </div>\n    `}_renderGrid(){const{rows:e,dates:t}=this._processedData,n=t[0].toLocaleDateString(void 0,{month:"long",year:"numeric"}),i=t.map(e=>`<div class="date-header">${e.getDate()}</div>`).join("");return`\n      <div class="heatmap-grid">\n        <div class="month-header">${n}</div>\n        <div class="grid-wrapper">\n          <div class="time-labels">\n            ${e.map(e=>`<div class="time-label">${e.label}</div>`).join("")}\n          </div>\n          <div class="data-grid-container">\n            <div class="date-headers">\n              ${i}\n            </div>\n            <div class="data-grid">\n              ${e.map(e=>e.cells.map(e=>this._renderCell(e)).join("")).join("")}\n            </div>\n          </div>\n        </div>\n      </div>\n    `}_renderCell(e){if(!e.hasData)return'<div class="cell no-data"><span class="temperature">-</span></div>';const t=this._config.color_thresholds,i=this._config.interpolate_colors,a=this._config.color_interpolation,r=c(e.temperature,t,i,a),o=function(e){if(e.startsWith("var("))return"var(--primary-text-color)";const t=n(e);return t?(.299*t.r+.587*t.g+.114*t.b)/255>.5?"#000000":"#ffffff":"var(--primary-text-color)"}(r),s=this._config.decimals,l=e.isPartial?"*":"",d=e.isPartial?" (in progress)":"",h=e.isFilled?" (estimated)":"";let p="cell";return e.isPartial&&(p+=" partial"),e.isFilled&&(p+=" filled"),`\n      <div class="${p}"\n           style="background-color: ${r}; color: ${o}"\n           data-temperature="${e.temperature}"\n           data-date="${e.date.toISOString()}"\n           data-partial="${e.isPartial?"true":"false"}"\n           data-filled="${e.isFilled?"true":"false"}"\n           tabindex="0"\n           role="button"\n           aria-label="Temperature ${e.temperature.toFixed(s)}${d}${h}">\n        <span class="temperature">${e.temperature.toFixed(s)}${l}</span>\n      </div>\n    `}_renderLegend(){const e=this._config.color_thresholds;if(!e||0===e.length)return"";const t=this._getUnit(),n=this._config.interpolate_colors,i=this._config.color_interpolation,a=e[0].value,r=e[e.length-1].value-a||1;let o;if(n&&e.length>=2){const t=[];for(let n=0;n<=20;n++){const o=n/20,s=c(a+o*r,e,!0,i);t.push(`${s} ${(100*o).toFixed(1)}%`)}o=t.join(", ")}else{const t=[];for(let n=0;n<e.length;n++){const i=e[n],o=(i.value-a)/r*100;if(t.push(`${i.color} ${o.toFixed(1)}%`),n<e.length-1){const o=(e[n+1].value-a)/r*100;t.push(`${i.color} ${o.toFixed(1)}%`)}}o=t.join(", ")}let s=-1/0;return`\n    <div class="legend">\n      <div class="legend-bar" style="background: linear-gradient(to right, ${o})"></div>\n      <div class="legend-labels" style="position:relative;">\n        ${e.map(e=>{const n=(e.value-a)/r*100;return n-s<8?"":(s=n,`<span style="position:absolute; left:${n.toFixed(1)}%;">${e.value}${t}</span>`)}).join("")}\n      </div>\n    </div>\n  `}_renderFooter(){const{stats:e}=this._processedData,t=this._getUnit(),n=this._config.decimals;let i="";if(this._config.show_entity_name){const e=this._hass?.states[this._config.entity];i=`<div class="entity-name">${d(e?.attributes?.friendly_name||this._config.entity)}</div>`}return`\n      <div class="footer">\n        <div class="footer-stats">\n          <span>Min: ${e.min.toFixed(n)} ${t}</span>\n          <span>Max: ${e.max.toFixed(n)} ${t}</span>\n          <span>Avg: ${e.avg.toFixed(n)} ${t}</span>\n        </div>\n        ${i}\n      </div>\n    `}_getUnit(){let e;if(this._config.unit)e=this._config.unit;else{const t=this._hass?.states[this._config.entity];e=t?.attributes?.unit_of_measurement||"°F"}return this._config.show_degree_symbol||(e=e.replace("°","")),e}_handleClick(e){const t=e.target.closest(".nav-btn, .nav-btn-current");if(t&&!t.disabled){const e=t.dataset.direction;return void this._handleNavigation(e)}const n=e.target.closest(".cell");n&&!n.classList.contains("no-data")&&this._handleCellClick(n)}_handleNavigation(e){"back"===e?this._viewOffset-=this._config.days:"forward"===e?(this._viewOffset+=this._config.days,this._viewOffset>0&&(this._viewOffset=0)):"current"===e&&(this._viewOffset=0),this._fetchHistoryData()}_handleCellClick(e){switch(this._config.click_action){case"more-info":this._showMoreInfo();break;case"tooltip":this._showTooltip(e)}}_showMoreInfo(){this.dispatchEvent(new CustomEvent("hass-more-info",{bubbles:!0,composed:!0,detail:{entityId:this._config.entity}}))}_showTooltip(e){const t=parseFloat(e.dataset.temperature),n=new Date(e.dataset.date),i="true"===e.dataset.partial,a="true"===e.dataset.filled,r=this.shadowRoot.querySelector(".tooltip");r&&r.remove();const o=document.createElement("div");o.className="tooltip";const s=n.toLocaleString(void 0,{month:"short",day:"numeric"}),l=this._getUnit(),c=this._config.decimals,d=i?"<div><em>(in progress)</em></div>":"",h=a?"<div><em>(estimated - gap filled)</em></div>":"";o.innerHTML=`\n      <div><strong>${s}</strong></div>\n      <div>Temperature: ${t.toFixed(c)} ${l}</div>\n      <div>Mode: ${this._config.aggregation_mode}</div>\n      ${d}\n      ${h}\n    `;const p=e.getBoundingClientRect(),u=this._content.getBoundingClientRect();o.style.left=p.left-u.left+p.width/2+"px",o.style.top=p.bottom-u.top+4+"px",o.style.transform="translateX(-50%)",this._content.appendChild(o),setTimeout(()=>{o.parentElement&&o.remove()},3e3)}_getEffectiveSizing(){return this._config.compact?{cellHeight:"24px",cellWidth:"1fr",cellPadding:"1px",cellGap:"1px",cellFontSize:"9px"}:{cellHeight:p(this._config.cell_height,"36px"),cellWidth:p(this._config.cell_width,"1fr"),cellPadding:p(this._config.cell_padding,"2px"),cellGap:p(this._config.cell_gap,"2px"),cellFontSize:p(this._config.cell_font_size,"11px")}}}class _ extends HTMLElement{set hass(e){this._hass=e,this.content||this._buildEditor()}async setConfig(e){this._config={...e||{}};const t=await window.loadCardHelpers();if(!customElements.get("ha-entity-picker")){const e=await t.createCardElement({type:"entities",entities:[]});await e.constructor.getConfigElement()}this._config={entity:"",title:"Temperature History",days:7,time_interval:2,time_format:"24",start_hour:0,end_hour:23,aggregation_mode:"average",decimals:1,unit:"",refresh_interval:300,click_action:"more-info",show_entity_name:!1,show_legend:!1,cell_height:36,cell_width:"1fr",cell_padding:2,cell_gap:2,cell_font_size:11,compact:!1,compact_header:!1,rounded_corners:!0,interpolate_colors:!1,color_interpolation:"hsl",color_thresholds:[],data_source:"auto",statistic_type:"mean",fill_gaps:!1,...this._config},this.content&&this._updateValues()}getConfig(){return{...this._config}}_buildEditor(){this.content=document.createElement("div"),this.content.style.display="grid",this.content.style.gridGap="8px",this.content.style.padding="8px",this.appendChild(this.content),this.container_threshold={},this.fields={};[{type:"entity",key:"entity",label:"Entity",required:!0},{type:"text",key:"title",label:"Title"},{type:"number",key:"days",label:"Days",min:1,max:365},{type:"number",key:"time_interval",label:"Time Interval (hours)",min:1,max:24},{type:"select",key:"time_format",label:"Time Format",options:{24:"24h",12:"12h"}},{type:"number",key:"start_hour",label:"Start Hour",min:0,max:23},{type:"number",key:"end_hour",label:"End Hour",min:0,max:23},{type:"select",key:"aggregation_mode",label:"Aggregation Mode",options:{average:"Average",min:"Min",max:"Max"}},{type:"select",key:"data_source",label:"Data Source",options:{auto:"Auto (statistics for past, history for current)",history:"History only (limited by purge_keep_days)",statistics:"Statistics only (long-term hourly data)"}},{type:"select",key:"statistic_type",label:"Statistic Type",options:{mean:"Average",max:"Maximum",min:"Minimum"}},{type:"number",key:"decimals",label:"Decimals",min:0,max:2},{type:"select",key:"unit",label:"Unit",options:{"°C":"Celsius","°F":"Fahrenheit"}},{type:"number",key:"refresh_interval",label:"Refresh Interval (s)",min:10,max:3600},{type:"select",key:"click_action",label:"Click Action",options:{none:"None","more-info":"More Info",tooltip:"Tooltip"}},{type:"switch",key:"show_entity_name",label:"Show Entity Name"},{type:"switch",key:"show_legend",label:"Show Legend"},{type:"switch",key:"show_degree_symbol",label:"Show Degree Symbol (°)"},{type:"number",key:"cell_height",label:"Cell Height",min:10,max:200},{type:"text",key:"cell_width",label:"Cell Width (px or fr)"},{type:"number",key:"cell_padding",label:"Cell Padding",min:0,max:50},{type:"number",key:"cell_gap",label:"Cell Gap",min:0,max:50},{type:"number",key:"cell_font_size",label:"Cell Font Size",min:6,max:32},{type:"switch",key:"compact",label:"Compact Mode"},{type:"switch",key:"compact_header",label:"Compact Header"},{type:"switch",key:"rounded_corners",label:"Rounded Corners"},{type:"switch",key:"interpolate_colors",label:"Interpolate Colors"},{type:"select",key:"color_interpolation",label:"Color Interpolation",options:{rgb:"RGB",gamma:"Gamma RGB",hsl:"HSL",lab:"LAB"}},{type:"switch",key:"fill_gaps",label:"Fill Gaps - use at your own risk (forward-fills last known value into empty buckets)"},{type:"thresholds",key:"color_thresholds",label:"Colors"}].forEach(e=>this._createField(e)),this._updateValues()}_createThresholdEditor(){const e=(e,t)=>{const n=document.createElement("div");n.style.display="flex",n.style.alignItems="center",n.style.gap="8px";const i=document.createElement("ha-textfield");i.type="number",i.value=e.value,i.addEventListener("change",e=>{e.stopPropagation();const n=[...this._config.color_thresholds],i={...this._config.color_thresholds[t]};i.value=Number(e.target.value),n[t]=i,this._onFieldChange("color_thresholds",n),this._refreshThresholdEditor()});const a=document.createElement("input");a.type="color",a.value=e.color,a.addEventListener("change",e=>{e.stopPropagation();const n=[...this._config.color_thresholds],i={...this._config.color_thresholds[t]};i.color=e.target.value,n[t]=i,this._onFieldChange("color_thresholds",n),this._refreshThresholdEditor()});const r=document.createElement("button");r.textContent="X",r.style.cursor="pointer",r.addEventListener("click",e=>{e.stopPropagation();const n=[...this._config.color_thresholds];n.splice(t,1),this._onFieldChange("color_thresholds",n),this._refreshThresholdEditor()}),n.appendChild(i),n.appendChild(a),n.appendChild(r),this.container_threshold.appendChild(n)};this._config.color_thresholds||(this._config.color_thresholds=[]),this._config.color_thresholds.forEach((t,n)=>e(t,n))}_refreshThresholdEditor(){for(;this.container_threshold.firstChild;)this.container_threshold.removeChild(this.container_threshold.firstChild);this._createThresholdEditor()}_updateValues(){if(this._config)for(const e in this.fields){const t=this.fields[e].input;"checkbox"===this.fields[e].type||"switch"===this.fields[e].type?t.checked=!!this._config[e]:"thresholds"===this.fields[e].type?this._refreshThresholdEditor():t.value=void 0!==this._config[e]?this._config[e]:""}}_createField({type:e,key:t,label:n,min:i,max:a,options:r,required:o}){const s=document.createElement("div");let l;if(s.style.display="flex",s.style.flexDirection="column",s.style.marginBottom="8px","switch"===e){s.style.flexDirection="row",s.style.alignItems="center",s.style.gap="8px",l=document.createElement("ha-switch");const e=document.createElement("label");e.textContent=n,s.appendChild(l),s.appendChild(e),l.addEventListener("change",e=>{e.stopPropagation(),this._onFieldChange(t,l.checked)})}else if("thresholds"===e){const e=document.createElement("label");e.textContent=n,s.appendChild(e);const i=document.createElement("div");i.style.display="grid",i.style.gridGap="8px",s.appendChild(i),this.container_threshold=i;const a=document.createElement("button");a.textContent="Add Threshold",a.style.marginTop="8px",a.addEventListener("click",e=>{e.stopPropagation();const n=[...this._config.color_thresholds];n.push({value:0,color:"#ffffff"}),this._onFieldChange(t,n)}),s.appendChild(a)}else{const c=document.createElement("label");if(c.textContent=n,s.appendChild(c),"entity"===e)l=document.createElement("ha-entity-picker"),l.setAttribute("allow-custom-entity",""),l.hass=this._hass,l.addEventListener("value-changed",e=>{e.stopPropagation(),this._onFieldChange(t,e.detail.value)});else if("number"===e||"text"===e)l=document.createElement("ha-textfield"),l.type=e,void 0!==i&&(l.min=i),void 0!==a&&(l.max=a),o&&(l.required=!0),l.addEventListener("change",n=>{n.stopPropagation();const i="number"===e?Number(l.value):l.value;this._onFieldChange(t,i)});else if("select"===e){l=document.createElement("ha-select");for(const e in r){const t=document.createElement("mwc-list-item");t.value=e,t.innerText=r[e],l.appendChild(t)}l.addEventListener("selected",e=>{e.stopPropagation(),this._onFieldChange(t,e.target.value)}),l.addEventListener("closed",e=>{e.stopPropagation()})}s.appendChild(l)}this.fields[t]={},this.fields[t].input=l,this.fields[t].type=e,this.content.appendChild(s)}_onFieldChange(e,t){const n={...this._config,[e]:t};this._config=n,this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:n},bubbles:!0,composed:!0}))}disconnectedCallback(){this.fields={},this.container_threshold=null}}window.customCards=window.customCards||[],window.customCards.push({type:"ha-temperature-heatmap-card",name:"Temperature Heatmap Card",description:"Display temperature history as a color-coded heatmap"}),console.info("%c TEMPERATURE-HEATMAP-CARD %c v0.7.0 ","color: lightblue; font-weight: bold; background: black","color: white; font-weight: bold; background: dimgray"),customElements.define("ha-temperature-heatmap-card-editor",_),customElements.define("ha-temperature-heatmap-card",m);
-//# sourceMappingURL=ha-temperature-heatmap-card.js.map
+/* Last modified: 27-Feb-2026 23:57 */
+// Card CSS styles
+
+/**
+ * Create and return a <style> element with all card CSS rules.
+ * @returns {HTMLStyleElement} - Style element with card CSS
+ */
+function createStyleElement() {
+  const style = document.createElement('style');
+  style.textContent = `
+    /* Main container */
+    ha-card {
+      display: block;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    /* Card header with title and navigation */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid var(--divider-color);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--primary-text-color);
+    }
+
+    /* Navigation controls */
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
+      border: none;
+      border-radius: 4px;
+      width: 32px;
+      height: 32px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s ease;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      opacity: 0.8;
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .nav-btn:focus {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+
+    .nav-btn-current {
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .nav-btn-current:hover {
+      opacity: 0.8;
+    }
+
+    .nav-btn-current:focus {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+
+    .nav-btn-current.hidden {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .date-range {
+      font-size: 14px;
+      color: var(--secondary-text-color);
+      min-width: 120px;
+      text-align: center;
+    }
+
+    /* Heatmap grid container */
+    .heatmap-grid {
+      padding: 16px;
+    }
+
+    .month-header {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--primary-text-color);
+      margin-bottom: 12px;
+    }
+
+    /* Grid wrapper with time labels and data grid */
+    .grid-wrapper {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+
+    /* Time labels column */
+    .time-labels {
+      display: flex;
+      flex-direction: column;
+      gap: var(--cell-gap, 2px);
+      padding-top: 28px;  /* Align with data grid (after date headers) */
+    }
+
+    .time-label {
+      height: var(--cell-height, 36px);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      font-size: var(--cell-font-size, 11px);
+      color: var(--secondary-text-color);
+      font-weight: 500;
+    }
+
+    /* Data grid container */
+    .data-grid-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* Date headers row */
+    .date-headers {
+      display: grid;
+      grid-template-columns: repeat(var(--days-count, 7), 1fr);
+      gap: 2px;
+      margin-bottom: 4px;
+    }
+
+    .date-header {
+      text-align: center;
+      font-weight: bold;
+      font-size: 12px;
+      color: var(--primary-text-color);
+      padding: 4px;
+    }
+
+    /* Data cells grid */
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(var(--days-count, 7), var(--cell-width, 1fr));
+      grid-auto-rows: var(--cell-height, 36px);
+      gap: var(--cell-gap, 2px);
+    }
+
+    /* Individual cells */
+    .cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--cell-border-radius, 4px);
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      position: relative;
+      font-size: var(--cell-font-size, 11px);
+      padding: var(--cell-padding, 2px);
+      box-sizing: border-box;
+    }
+
+    /* Only apply hover effects on devices with a true hover-capable pointer.
+       On touch devices, :hover is sticky after tap and can cause the cell to
+       render on top of the more-info popup due to the transform stacking context. */
+    @media (hover: hover) {
+      .cell:hover:not(.no-data) {
+        transform: scale(1.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+      }
+
+      .cell.no-data:hover {
+        transform: none;
+        box-shadow: none;
+      }
+    }
+
+    .cell:focus {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+
+    .cell.no-data {
+      background-color: var(--disabled-color, #f0f0f0);
+      cursor: default;
+      opacity: 0.4;
+    }
+
+    .cell.partial {
+      border: 2px dashed currentColor;
+      opacity: 0.9;
+    }
+
+    /* Gap-filled cell: estimated value from last known reading */
+    .cell.filled {
+      opacity: 0.6;
+      border: 1px dashed currentColor;
+    }
+
+    .temperature {
+      font-weight: bold;
+      line-height: 1.1;
+    }
+
+    /* Footer with statistics */
+    .footer {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--divider-color);
+      background: var(--card-background-color);
+      font-size: 13px;
+      color: var(--secondary-text-color);
+    }
+
+    .footer-stats {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .footer-stats span {
+      font-weight: 500;
+    }
+
+    .entity-name {
+      text-align: center;
+      font-size: 11px;
+      color: var(--secondary-text-color);
+      opacity: 0.8;
+    }
+
+    /* Loading state */
+    .loading {
+      text-align: center;
+      padding: 32px;
+      color: var(--secondary-text-color);
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--divider-color);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Error message */
+    .error-message {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      margin: 16px;
+      background: rgba(244, 67, 54, 0.1);
+      color: var(--error-color, #f44336);
+      border-radius: 4px;
+      border-left: 4px solid var(--error-color, #f44336);
+    }
+
+    .error-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .error-text {
+      flex: 1;
+    }
+
+    .error-details {
+      font-size: 11px;
+      margin-top: 4px;
+      opacity: 0.8;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      z-index: 1000;
+      background: var(--card-background-color, white);
+      border: 1px solid var(--divider-color);
+      border-radius: 4px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+      padding: 8px 12px;
+      font-size: 12px;
+      pointer-events: none;
+      max-width: 250px;
+      line-height: 1.4;
+    }
+
+    .tooltip div {
+      margin: 2px 0;
+    }
+
+    .tooltip strong {
+      color: var(--primary-text-color);
+    }
+
+    /* Legend bar */
+    .legend {
+      padding: 8px 16px 12px;
+      border-top: 1px solid var(--divider-color);
+    }
+
+    .legend-bar {
+      height: 12px;
+      border-radius: 3px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .legend-labels {
+      position: relative;
+      height: 14px;
+      margin-top: 4px;
+      font-size: 9px;
+      color: var(--secondary-text-color);
+    }
+
+    .legend-labels span {
+      white-space: nowrap;
+    }
+
+    /* Compact header: reduces padding, title size, and nav arrow size */
+    .compact-header .card-header {
+      padding: 4px 8px;
+      gap: 4px;
+    }
+
+    .compact-header .title {
+      font-size: 14px;
+    }
+
+    .compact-header .nav-btn {
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+    }
+
+    .compact-header .nav-btn-current {
+      padding: 2px 6px;
+      font-size: 11px;
+    }
+
+    .compact-header .month-header {
+      font-size: 13px;
+      margin-bottom: 4px;
+      padding: 2px 0;
+    }
+
+    .compact-header .footer {
+      padding: 6px 8px;
+      gap: 4px;
+      font-size: 11px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .data-grid {
+        grid-auto-rows: calc(var(--cell-height, 36px) * 0.83);
+      }
+
+      .time-label {
+        height: calc(var(--cell-height, 36px) * 0.83);
+        font-size: calc(var(--cell-font-size, 11px) * 0.91);
+      }
+
+      .cell {
+        font-size: calc(var(--cell-font-size, 11px) * 0.91);
+      }
+
+      .date-header {
+        font-size: 11px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .card-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .nav-controls {
+        justify-content: center;
+      }
+    }
+
+    /* Accessibility: High contrast mode support */
+    @media (prefers-contrast: high) {
+      .cell:not(.no-data) {
+        border: 1px solid currentColor;
+      }
+    }
+
+    /* Accessibility: Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      .cell,
+      .nav-btn,
+      .loading-spinner {
+        transition: none;
+        animation: none;
+      }
+    }
+  `;
+  return style;
+}
+
+// Default color thresholds for temperature display
+
+// Default color thresholds for Fahrenheit
+const DEFAULT_THRESHOLDS_F = [
+  { value: 0,  color: '#1a237e' },  // 0F: Deep freeze (dark blue)
+  { value: 32, color: '#42a5f5' },  // 32F: Freezing (light blue)
+  { value: 40, color: '#80deea' },  // 40F: Cold (cyan)
+  { value: 50, color: '#66bb6a' },  // 50F: Cool/comfortable start (green)
+  { value: 60, color: '#4caf50' },  // 60F: Comfortable (medium green)
+  { value: 70, color: '#81c784' },  // 70F: Comfortable (light green)
+  { value: 75, color: '#ffeb3b' },  // 75F: Getting warm/caution (yellow)
+  { value: 80, color: '#ff9800' },  // 80F: Warm (orange)
+  { value: 85, color: '#f44336' }   // 85F: Hot (red)
+];
+
+// Default color thresholds for Celsius
+const DEFAULT_THRESHOLDS_C = [
+  { value: -18, color: '#1a237e' },  // -18C: Deep freeze (dark blue)
+  { value: 0,   color: '#42a5f5' },  // 0C: Freezing (light blue)
+  { value: 4,   color: '#80deea' },  // 4C: Cold (cyan)
+  { value: 10,  color: '#66bb6a' },  // 10C: Cool/comfortable start (green)
+  { value: 16,  color: '#4caf50' },  // 16C: Comfortable (medium green)
+  { value: 21,  color: '#81c784' },  // 21C: Comfortable (light green)
+  { value: 24,  color: '#ffeb3b' },  // 24C: Getting warm/caution (yellow)
+  { value: 27,  color: '#ff9800' },  // 27C: Warm (orange)
+  { value: 29,  color: '#f44336' }   // 29C: Hot (red)
+];
+
+/**
+ * Get appropriate default thresholds based on unit of measurement.
+ * @param {string} unit - The unit of measurement (F, C, etc.)
+ * @returns {Array} - Array of threshold objects with value and color properties
+ */
+function getDefaultThresholdsForUnit(unit) {
+  if (!unit) return DEFAULT_THRESHOLDS_F;
+  const u = unit.toLowerCase().trim();
+  if (u.includes('c') || u === '°c' || u === 'celsius') {
+    return DEFAULT_THRESHOLDS_C;
+  }
+  return DEFAULT_THRESHOLDS_F;
+}
+
+// Card version
+const VERSION = '0.7.0';
+
+// Color parsing, interpolation, and utility functions
+
+/**
+ * Parse color string to RGB object.
+ * Supports hex (#RRGGBB), rgba(), and rgb() formats.
+ * @param {string} color - Color string
+ * @returns {Object|null} - RGB object {r, g, b} or null if parsing fails
+ */
+function parseColor(color) {
+  // Handle hex format first (most common for temperature thresholds)
+  if (color.startsWith('#')) {
+    const hex = color.replace('#', '');
+    if (hex.length === 6) {
+      return {
+        r: parseInt(hex.substr(0, 2), 16),
+        g: parseInt(hex.substr(2, 2), 16),
+        b: parseInt(hex.substr(4, 2), 16)
+      };
+    }
+  }
+  // Handle rgba() format
+  if (color.startsWith('rgba(')) {
+    const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+      return {
+        r: parseInt(match[1], 10),
+        g: parseInt(match[2], 10),
+        b: parseInt(match[3], 10)
+      };
+    }
+  }
+  // Handle rgb() format
+  if (color.startsWith('rgb(')) {
+    const match = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    if (match) {
+      return {
+        r: parseInt(match[1], 10),
+        g: parseInt(match[2], 10),
+        b: parseInt(match[3], 10)
+      };
+    }
+  }
+  return null;
+}
+
+/**
+ * Convert RGB object to hex color string.
+ * @param {Object} rgb - RGB color object {r, g, b}
+ * @returns {string} - Hex color string (#RRGGBB)
+ */
+function rgbToHex(rgb) {
+  const toHex = v =>
+    Math.max(0, Math.min(255, Math.round(v)))
+      .toString(16)
+      .padStart(2, '0');
+  return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
+}
+
+/**
+ * Linear RGB interpolation.
+ * @param {Object} rgb1 - Start RGB color
+ * @param {Object} rgb2 - End RGB color
+ * @param {number} t - Interpolation factor (0-1)
+ * @returns {string} - Interpolated color as hex string
+ */
+function interpolateRGB(rgb1, rgb2, t) {
+  return rgbToHex({
+    r: Math.round(rgb1.r + (rgb2.r - rgb1.r) * t),
+    g: Math.round(rgb1.g + (rgb2.g - rgb1.g) * t),
+    b: Math.round(rgb1.b + (rgb2.b - rgb1.b) * t)
+  });
+}
+
+/**
+ * Gamma-corrected RGB interpolation.
+ * @param {Object} rgb1 - Start RGB color
+ * @param {Object} rgb2 - End RGB color
+ * @param {number} t - Interpolation factor (0-1)
+ * @param {number} gamma - Gamma value (default 2.2)
+ * @returns {string} - Interpolated color as hex string
+ */
+function interpolateGamma(rgb1, rgb2, t, gamma = 2.2) {
+  const interp = (x, y) =>
+    Math.pow(
+      Math.pow(x / 255, gamma) +
+      (Math.pow(y / 255, gamma) - Math.pow(x / 255, gamma)) * t,
+      1 / gamma
+    ) * 255;
+
+  return rgbToHex({
+    r: interp(rgb1.r, rgb2.r),
+    g: interp(rgb1.g, rgb2.g),
+    b: interp(rgb1.b, rgb2.b)
+  });
+}
+
+/**
+ * Convert RGB to HSL color space.
+ * @param {Object} rgb - RGB color object
+ * @returns {Object} - HSL color object {h, s, l}
+ */
+function rgbToHsl(rgb) {
+  const r = rgb.r / 255;
+  const g = rgb.g / 255;
+  const b = rgb.b / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0, s = 0;
+  const l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h *= 60;
+  }
+
+  return { h, s, l };
+}
+
+/**
+ * Convert HSL to RGB color space.
+ * @param {Object} hsl - HSL color object {h, s, l}
+ * @returns {Object} - RGB color object {r, g, b}
+ */
+function hslToRgb(hsl) {
+  const { h, s, l } = hsl;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  const m = l - c / 2;
+  let r = 0, g = 0, b = 0;
+
+  if (h < 60) [r, g, b] = [c, x, 0];
+  else if (h < 120) [r, g, b] = [x, c, 0];
+  else if (h < 180) [r, g, b] = [0, c, x];
+  else if (h < 240) [r, g, b] = [0, x, c];
+  else if (h < 300) [r, g, b] = [x, 0, c];
+  else [r, g, b] = [c, 0, x];
+
+  return {
+    r: (r + m) * 255,
+    g: (g + m) * 255,
+    b: (b + m) * 255
+  };
+}
+
+/**
+ * HSL interpolation (takes shortest path around hue wheel).
+ * @param {Object} rgb1 - Start RGB color
+ * @param {Object} rgb2 - End RGB color
+ * @param {number} t - Interpolation factor (0-1)
+ * @returns {string} - Interpolated color as hex string
+ */
+function interpolateHSL(rgb1, rgb2, t) {
+  const hsl1 = rgbToHsl(rgb1);
+  const hsl2 = rgbToHsl(rgb2);
+
+  // Handle hue interpolation (shortest path)
+  let dh = hsl2.h - hsl1.h;
+  if (Math.abs(dh) > 180) dh -= Math.sign(dh) * 360;
+
+  const h = (hsl1.h + dh * t + 360) % 360;
+  const s = hsl1.s + (hsl2.s - hsl1.s) * t;
+  const l = hsl1.l + (hsl2.l - hsl1.l) * t;
+
+  return rgbToHex(hslToRgb({ h, s, l }));
+}
+
+/**
+ * Convert RGB to XYZ color space.
+ * @param {number} r - Red (0-255)
+ * @param {number} g - Green (0-255)
+ * @param {number} b - Blue (0-255)
+ * @returns {Object} - XYZ color object {x, y, z}
+ */
+function rgbToXyz(r, g, b) {
+  [r, g, b] = [r, g, b].map((v) => {
+    v /= 255;
+    return v > 0.04045 ? Math.pow((v + 0.055) / 1.055, 2.4) : v / 12.92;
+  });
+
+  return {
+    x: (r * 0.4124 + g * 0.3576 + b * 0.1805) * 100,
+    y: (r * 0.2126 + g * 0.7152 + b * 0.0722) * 100,
+    z: (r * 0.0193 + g * 0.1192 + b * 0.9505) * 100,
+  };
+}
+
+/**
+ * Convert XYZ to RGB color space.
+ * @param {number} x - X component
+ * @param {number} y - Y component
+ * @param {number} z - Z component
+ * @returns {Object} - RGB color object {r, g, b}
+ */
+function xyzToRgb(x, y, z) {
+  x /= 100; y /= 100; z /= 100;
+
+  let r = x * 3.2406 + y * -1.5372 + z * -0.4986;
+  let g = x * -0.9689 + y * 1.8758 + z * 0.0415;
+  let b = x * 0.0557 + y * -0.204 + z * 1.0570;
+
+  const gamma = v =>
+    v > 0.0031308
+      ? 1.055 * Math.pow(v, 1 / 2.4) - 0.055
+      : 12.92 * v;
+
+  return {
+    r: gamma(r) * 255,
+    g: gamma(g) * 255,
+    b: gamma(b) * 255
+  };
+}
+
+/**
+ * Convert RGB to LAB color space.
+ * @param {Object} rgb - RGB color object
+ * @returns {Object} - LAB color object {l, a, b}
+ */
+function rgbToLab(rgb) {
+  const xyz = rgbToXyz(rgb.r, rgb.g, rgb.b);
+  const ref = [95.047, 100.0, 108.883];
+
+  let x = xyz.x / ref[0];
+  let y = xyz.y / ref[1];
+  let z = xyz.z / ref[2];
+
+  [x, y, z] = [x, y, z].map(v =>
+    v > 0.008856 ? Math.cbrt(v) : (7.787 * v) + 16 / 116
+  );
+
+  return {
+    l: (116 * y) - 16,
+    a: 500 * (x - y),
+    b: 200 * (y - z)
+  };
+}
+
+/**
+ * Convert LAB to RGB color space.
+ * @param {Object} lab - LAB color object {l, a, b}
+ * @returns {Object} - RGB color object {r, g, b}
+ */
+function labToRgb(lab) {
+  let y = (lab.l + 16) / 116;
+  let x = lab.a / 500 + y;
+  let z = y - lab.b / 200;
+
+  [x, y, z] = [x, y, z].map(v => {
+    const v3 = v ** 3;
+    return v3 > 0.008856 ? v3 : (v - 16 / 116) / 7.787;
+  });
+
+  x *= 95.047;
+  y *= 100.0;
+  z *= 108.883;
+
+  return xyzToRgb(x, y, z);
+}
+
+/**
+ * LAB interpolation (perceptually uniform).
+ * @param {Object} rgb1 - Start RGB color
+ * @param {Object} rgb2 - End RGB color
+ * @param {number} t - Interpolation factor (0-1)
+ * @returns {string} - Interpolated color as hex string
+ */
+function interpolateLAB(rgb1, rgb2, t) {
+  const lab1 = rgbToLab(rgb1);
+  const lab2 = rgbToLab(rgb2);
+
+  const lab = {
+    l: lab1.l + (lab2.l - lab1.l) * t,
+    a: lab1.a + (lab2.a - lab1.a) * t,
+    b: lab1.b + (lab2.b - lab1.b) * t
+  };
+
+  return rgbToHex(labToRgb(lab));
+}
+
+/**
+ * Interpolate between two colors using the specified method.
+ * @param {string} color1 - Start color string
+ * @param {string} color2 - End color string
+ * @param {number} t - Interpolation factor (0-1)
+ * @param {string} method - Interpolation method ('rgb', 'gamma', 'hsl', 'lab')
+ * @returns {string} - Interpolated color as hex string
+ */
+function interpolateColor(color1, color2, t, method = 'hsl') {
+  const rgb1 = parseColor(color1);
+  const rgb2 = parseColor(color2);
+
+  if (!rgb1 || !rgb2) return color1;
+
+  switch (method) {
+    case 'rgb':
+      return interpolateRGB(rgb1, rgb2, t);
+    case 'gamma':
+      return interpolateGamma(rgb1, rgb2, t);
+    case 'hsl':
+      return interpolateHSL(rgb1, rgb2, t);
+    case 'lab':
+      return interpolateLAB(rgb1, rgb2, t);
+    default:
+      return interpolateHSL(rgb1, rgb2, t);
+  }
+}
+
+/**
+ * Get contrasting text color (black or white) for a background color.
+ * Uses luminance calculation to determine optimal contrast.
+ * @param {string} backgroundColor - Background color string
+ * @returns {string} - '#000000' for light backgrounds, '#ffffff' for dark backgrounds
+ */
+function getContrastTextColor(backgroundColor) {
+  // Handle CSS variables
+  if (backgroundColor.startsWith('var(')) {
+    return 'var(--primary-text-color)';
+  }
+
+  const rgb = parseColor(backgroundColor);
+  if (!rgb) {
+    return 'var(--primary-text-color)';
+  }
+
+  // Calculate relative luminance
+  const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+
+  // Return black for light backgrounds, white for dark backgrounds
+  return luminance > 0.5 ? '#000000' : '#ffffff';
+}
+
+/**
+ * Get color for temperature value based on thresholds.
+ * @param {number} temperature - Temperature value
+ * @param {Array} thresholds - Array of threshold objects {value, color}
+ * @param {boolean} interpolate - Whether to interpolate between thresholds
+ * @param {string} interpolationMethod - Interpolation method if enabled
+ * @returns {string} - Color string for the temperature value
+ */
+function getColorForTemperature(temperature, thresholds, interpolate = false, interpolationMethod = 'hsl') {
+  if (temperature === null || temperature === undefined) {
+    return 'var(--disabled-color, #f0f0f0)';
+  }
+
+  // If interpolation is disabled, use threshold-based coloring
+  if (!interpolate) {
+    let color = thresholds[0].color;
+    for (let i = 0; i < thresholds.length; i++) {
+      if (temperature >= thresholds[i].value) {
+        color = thresholds[i].color;
+      } else {
+        break;
+      }
+    }
+    return color;
+  }
+
+  // Interpolation mode: find the two thresholds to blend between
+  if (temperature <= thresholds[0].value) {
+    return thresholds[0].color;
+  }
+
+  if (temperature >= thresholds[thresholds.length - 1].value) {
+    return thresholds[thresholds.length - 1].color;
+  }
+
+  // Find the two thresholds to interpolate between
+  for (let i = 0; i < thresholds.length - 1; i++) {
+    if (temperature >= thresholds[i].value && temperature < thresholds[i + 1].value) {
+      const t = (temperature - thresholds[i].value) / (thresholds[i + 1].value - thresholds[i].value);
+      return interpolateColor(thresholds[i].color, thresholds[i + 1].color, t, interpolationMethod);
+    }
+  }
+
+  return thresholds[thresholds.length - 1].color;
+}
+
+// Formatting and utility functions
+
+/**
+ * Escape HTML to prevent XSS via textContent/innerHTML conversion.
+ * @param {string} text - Text to escape
+ * @returns {string} - HTML-escaped text
+ */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/**
+ * Format hour as "12a", "3p", etc. (12-hour) or "00", "15", etc. (24-hour).
+ * @param {number} hour - Hour (0-23)
+ * @param {string} format - Time format ('12' or '24')
+ * @returns {string} - Formatted hour string
+ */
+function formatHourLabel(hour, format = '24') {
+  if (format === '24') {
+    return String(hour).padStart(2, '0');
+  }
+  // 12-hour format
+  const h = hour === 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+  const suffix = hour < 12 ? 'a' : 'p';
+  return `${h}${suffix}`;
+}
+
+/**
+ * Normalize size values: numbers -> "Npx", strings -> pass through.
+ * @param {number|string} value - Size value
+ * @param {string} defaultValue - Default value if input is empty
+ * @returns {string} - Normalized size string
+ */
+function normalizeSize(value, defaultValue) {
+  if (value === undefined || value === null || value === '') {
+    return defaultValue;
+  }
+  if (typeof value === 'number') {
+    return `${value}px`;
+  }
+  return String(value);
+}
+
+/**
+ * Get date key in format YYYY-MM-DD using LOCAL timezone.
+ * @param {Date} date - Date object
+ * @returns {string} - Date key string
+ */
+function getDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Bucket hour into interval (e.g., hour 7 with 2-hour interval -> 6).
+ * @param {number} hour - Hour (0-23)
+ * @param {number} intervalHours - Interval in hours
+ * @returns {number} - Bucketed hour
+ */
+function getHourBucket(hour, intervalHours) {
+  return Math.floor(hour / intervalHours) * intervalHours;
+}
+
+// Temperature Heatmap Card - Main card component
+
+
+/**
+ * Temperature Heatmap Card - Main card component.
+ * Displays temperature history as a color-coded heatmap.
+ */
+class TemperatureHeatmapCard extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+
+    // Configuration and state
+    this._config = {};
+    this._hass = null;
+
+    // Data caching
+    this._historyData = null;
+    this._processedData = null;
+    this._lastFetch = 0;
+
+    // Navigation state
+    this._viewOffset = 0;  // Days offset from current (0=today, -7=week ago)
+
+    // UI state
+    this._isLoading = false;
+    this._error = null;
+    this._interval = null;
+
+    // Initialize Shadow DOM
+    this.shadowRoot.appendChild(createStyleElement());
+    this._content = document.createElement('ha-card');
+    this.shadowRoot.appendChild(this._content);
+
+    // Event delegation for all clicks
+    this._content.addEventListener('click', this._handleClick.bind(this));
+    // Store cached responses in memory
+    this._responseCache = new Map(); // key -> { data, expiry }
+  }
+
+  // Home Assistant required method: set card configuration
+  setConfig(config) {
+    // Validate required fields
+    if (!config.entity) {
+      throw new Error("'entity' is required (temperature sensor)");
+    }
+
+    // Validate time_interval
+    const validIntervals = [1, 2, 3, 4, 6, 8, 12, 24];
+    if (config.time_interval && !validIntervals.includes(config.time_interval)) {
+      throw new Error(`time_interval must be one of: ${validIntervals.join(', ')}`);
+    }
+
+    // Validate days
+    if (config.days && (config.days < 1 || config.days > 30)) {
+      throw new Error('days must be between 1 and 30');
+    }
+
+    // Validate aggregation_mode
+    const validAggregations = ['average', 'min', 'max'];
+    if (config.aggregation_mode && !validAggregations.includes(config.aggregation_mode)) {
+      throw new Error(`aggregation_mode must be one of: ${validAggregations.join(', ')}`);
+    }
+
+    // Validate color_interpolation
+    const validInterpolations = ['rgb', 'gamma', 'hsl', 'lab'];
+    if (config.color_interpolation && !validInterpolations.includes(config.color_interpolation)) {
+      throw new Error(`color_interpolation must be one of: ${validInterpolations.join(', ')}`);
+    }
+
+    // Validate data_source
+    const validDataSources = ['auto', 'history', 'statistics'];
+    if (config.data_source && !validDataSources.includes(config.data_source)) {
+      throw new Error(`data_source must be one of: ${validDataSources.join(', ')}`);
+    }
+
+    // Validate statistic_type
+    const validStatisticTypes = ['mean', 'min', 'max'];
+    if (config.statistic_type && !validStatisticTypes.includes(config.statistic_type)) {
+      throw new Error(`statistic_type must be one of: ${validStatisticTypes.join(', ')}`);
+    }
+
+    // Validate decimals
+    if (config.decimals !== undefined && (config.decimals < 0 || config.decimals > 2)) {
+      throw new Error('decimals must be between 0 and 2');
+    }
+
+    // Validate start_hour
+    if (config.start_hour !== undefined && (!Number.isInteger(config.start_hour) || config.start_hour < 0 || config.start_hour > 23)) {
+      throw new Error('start_hour must be an integer between 0 and 23');
+    }
+
+    // Validate end_hour
+    if (config.end_hour !== undefined && (!Number.isInteger(config.end_hour) || config.end_hour < 0 || config.end_hour > 23)) {
+      throw new Error('end_hour must be an integer between 0 and 23');
+    }
+
+    // Validate cell sizing options
+    if (config.cell_height !== undefined) {
+      const height = typeof config.cell_height === 'number' ? config.cell_height : parseFloat(config.cell_height);
+      if (isNaN(height) || height < 10 || height > 200) {
+        throw new Error('cell_height must be between 10 and 200 pixels');
+      }
+    }
+
+    if (config.cell_padding !== undefined) {
+      const padding = typeof config.cell_padding === 'number' ? config.cell_padding : parseFloat(config.cell_padding);
+      if (isNaN(padding) || padding < 0 || padding > 20) {
+        throw new Error('cell_padding must be between 0 and 20 pixels');
+      }
+    }
+
+    if (config.cell_gap !== undefined) {
+      const gap = typeof config.cell_gap === 'number' ? config.cell_gap : parseFloat(config.cell_gap);
+      if (isNaN(gap) || gap < 0 || gap > 20) {
+        throw new Error('cell_gap must be between 0 and 20 pixels');
+      }
+    }
+
+    if (config.cell_font_size !== undefined) {
+      const fontSize = typeof config.cell_font_size === 'number' ? config.cell_font_size : parseFloat(config.cell_font_size);
+      if (isNaN(fontSize) || fontSize < 6 || fontSize > 24) {
+        throw new Error('cell_font_size must be between 6 and 24 pixels');
+      }
+    }
+
+    if (config.cell_width !== undefined && typeof config.cell_width !== 'string') {
+      const width = parseFloat(config.cell_width);
+      if (isNaN(width) || width < 10 || width > 500) {
+        throw new Error('cell_width as number must be between 10 and 500 pixels');
+      }
+    }
+
+    // Build configuration with defaults
+    this._config = {
+      // Required
+      entity: config.entity,
+
+      // Display options
+      title: config.title || 'Temperature History',
+      days: config.days || 7,
+      time_interval: config.time_interval || 2,
+      time_format: config.time_format || '24',  // '12' or '24'
+
+      // Hour filtering
+      start_hour: config.start_hour !== undefined ? config.start_hour : 0,  // 0-23
+      end_hour: config.end_hour !== undefined ? config.end_hour : 23,  // 0-23
+
+      // Aggregation mode
+      aggregation_mode: config.aggregation_mode || 'average',  // 'average', 'min', 'max'
+
+      // Display precision
+      decimals: config.decimals !== undefined ? config.decimals : 1,  // 0, 1, or 2
+
+      // Units
+      unit: config.unit || null,
+
+      // Color thresholds - auto-detect based on unit if not provided or empty
+      color_thresholds: (config.color_thresholds && config.color_thresholds.length > 0)
+        ? config.color_thresholds
+        : this._getDefaultThresholds(),
+
+      // Refresh
+      refresh_interval: config.refresh_interval || 300,  // Seconds (5 min default)
+
+      // Interaction
+      click_action: config.click_action || 'more-info',  // 'none', 'more-info', 'tooltip'
+
+      // Display options
+      show_entity_name: config.show_entity_name || false,
+      show_legend: config.show_legend || false,
+      show_degree_symbol: config.show_degree_symbol !== false,  // Default true
+
+      // Cell sizing options
+      cell_height: config.cell_height !== undefined ? config.cell_height : 36,
+      cell_width: config.cell_width !== undefined ? config.cell_width : '1fr',
+      cell_padding: config.cell_padding !== undefined ? config.cell_padding : 2,
+      cell_gap: config.cell_gap !== undefined ? config.cell_gap : 2,
+      cell_font_size: config.cell_font_size !== undefined ? config.cell_font_size : 11,
+      compact: config.compact || false,
+
+      // Visual options
+      rounded_corners: config.rounded_corners !== false,  // Default true
+      interpolate_colors: config.interpolate_colors || false,
+      color_interpolation: config.color_interpolation || 'hsl',  // 'gamma', 'hsl', 'lab', 'rgb'
+
+      // Data source options
+      data_source: config.data_source || 'auto',  // 'auto', 'history', 'statistics'
+      statistic_type: config.statistic_type || 'mean',  // 'mean', 'min', 'max' (for statistics data)
+
+      // Gap filling: forward-fill last known value into empty buckets (use at your own risk)
+      fill_gaps: config.fill_gaps || false,
+
+      // Compact header: reduce padding around month/year label and shrink nav arrows
+      compact_header: config.compact_header || false,
+    };
+
+    // Sort thresholds by value (ascending) - create mutable copy to avoid "read-only" errors
+    this._config.color_thresholds = [...this._config.color_thresholds].sort((a, b) => a.value - b.value);
+
+    // Set up refresh interval
+    if (this._hass) {
+      this._clearAndSetInterval();
+    }
+  }
+
+  static getConfigElement() {
+    return document.createElement("ha-temperature-heatmap-card-editor");
+  }
+
+  // Returns a minimal configuration that will result in a working card
+  static getStubConfig(hass) {
+    // Find the first temperature sensor
+    const temperatureSensors = Object.keys(hass.states)
+      .filter(entityId => {
+        if (!entityId.startsWith('sensor.')) return false;
+        const entity = hass.states[entityId];
+        return entity?.attributes?.['device_class'] === 'temperature';
+      });
+
+    // Auto-detect unit from first sensor or HA config
+    let thresholds = DEFAULT_THRESHOLDS_F.slice();  // Default to Fahrenheit
+    if (temperatureSensors.length > 0) {
+      const unit = hass.states[temperatureSensors[0]]?.attributes?.unit_of_measurement || '';
+      if (unit.toLowerCase().includes('c') || unit === '°C') {
+        thresholds = DEFAULT_THRESHOLDS_C.slice();
+      }
+    }
+
+    return {
+      entity: temperatureSensors.length > 0 ? temperatureSensors[0] : '',
+      title: 'Temperature History',
+      days: 7,
+      time_interval: 2,
+      aggregation_mode: 'average',
+      color_thresholds: thresholds
+    };
+  }
+
+  // Get default thresholds based on detected unit
+  _getDefaultThresholds() {
+    const unit = this._getUnit().toLowerCase();
+    return getDefaultThresholdsForUnit(unit);
+  }
+
+  // Home Assistant required method: receive hass object updates
+  set hass(hass) {
+    this._hass = hass;
+
+    if (!this._config || !this.isConnected) return;
+
+    // Only fetch if viewing current data and data is stale
+    if (this._viewOffset === 0 && this._isDataStale()) {
+      this._fetchHistoryData();
+    }
+  }
+
+  // Home Assistant required method: return card height hint
+  getCardSize() {
+    // Calculate based on number of rows (time slots) and dynamic cell height
+    const rows = this._processedData ? this._processedData.rows.length : 12;
+    const sizing = this._getEffectiveSizing();
+    const cellHeightPx = parseFloat(sizing.cellHeight) || 36;
+
+    // Each row = cellHeight, plus header ~60px, plus footer ~40px, divided by 50px per card unit
+    return Math.ceil((rows * cellHeightPx + 100) / 50);
+  }
+
+  // Lifecycle: component connected to DOM
+  connectedCallback() {
+    if (this._config && this._hass) {
+      this._clearAndSetInterval();
+    }
+  }
+
+  // Lifecycle: component disconnected from DOM
+  disconnectedCallback() {
+    if (this._interval) {
+      clearInterval(this._interval);
+      this._interval = null;
+    }
+  }
+
+  // Set up or refresh the data fetch interval
+  _clearAndSetInterval() {
+    if (this._interval) {
+      clearInterval(this._interval);
+      this._interval = null;
+    }
+
+    // Fetch immediately
+    this._fetchHistoryData();
+
+    // Set up periodic refresh (only when viewing current data)
+    const intervalMs = this._config.refresh_interval * 1000;
+    this._interval = setInterval(() => {
+      if (this._viewOffset === 0) {
+        this._fetchHistoryData();
+      }
+    }, intervalMs);
+  }
+
+  // Check if cached data is stale
+  _isDataStale() {
+    if (!this._historyData || !this._lastFetch) return true;
+
+    const age = Date.now() - this._lastFetch;
+    const maxAge = this._config.refresh_interval * 1000;
+
+    return age > maxAge;
+  }
+
+  async fetchWithCache(url, timeoutMs = 30000, ttlMs = 5 * 60 * 1000) {
+    const now = Date.now();
+    // Include viewOffset in cache key to prevent stale data when navigating
+    const cacheKey = `${url}_offset${this._viewOffset}`;
+
+    // Check if the cache has a valid entry
+    const cached = this._responseCache.get(cacheKey);
+    if (cached && cached.expiry > now) {
+      console.log('Using cached data for:', cacheKey);
+      return cached.data;
+    }
+
+    // Fetch with timeout
+    const fetchPromise = this._hass.callApi('GET', url);
+
+    const data = await Promise.race([
+      fetchPromise,
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error(`Request timeout after ${timeoutMs}ms`)),
+          timeoutMs
+        )
+      ),
+    ]);
+
+    // Store in cache
+    this._responseCache.set(cacheKey, { data, expiry: now + ttlMs });
+    return data;
+  }
+
+  // Determine which data source to use based on config and availability
+  _getDataSource() {
+    const source = this._config.data_source;
+
+    if (source === 'history') return 'history';
+    if (source === 'statistics') return 'statistics';
+
+    // Auto mode: prefer statistics for historical data (viewOffset < 0)
+    // or when explicitly looking at older data
+    // Statistics are hourly aggregates - good for longer time ranges
+    if (this._viewOffset < 0) {
+      return 'statistics';
+    }
+
+    // For current view, use history for more granular data
+    return 'history';
+  }
+
+  // Fetch historical data from Home Assistant
+  async _fetchHistoryData() {
+    if (this._isLoading) {
+      console.log('Temperature Heatmap: Already loading, skipping duplicate fetch');
+      return;
+    }
+
+    this._isLoading = true;
+    this._error = null;
+    this._render();  // Show loading state
+
+    const dataSource = this._getDataSource();
+    console.log(`Temperature Heatmap: Starting data fetch using ${dataSource}...`);
+
+    try {
+      // Calculate date range in LOCAL timezone, including current partial interval
+      const now = new Date();
+
+      let endTime;
+
+      // Calculate the current partial bucket key (only used when viewing current time)
+      let partialBucketKey = null;
+
+      if (this._viewOffset === 0) {
+        // Current view: use current time to include partial bucket data
+        endTime = new Date(now);
+
+        // Calculate which bucket is currently in progress
+        const intervalHours = this._config.time_interval;
+        const currentDateKey = getDateKey(now);
+        const currentHourBucket = getHourBucket(now.getHours(), intervalHours);
+        partialBucketKey = `${currentDateKey}_${currentHourBucket}`;
+      } else {
+        // Historical view: use end of the target day
+        endTime = new Date(now);
+        endTime.setDate(endTime.getDate() + this._viewOffset);
+        endTime.setHours(23, 59, 59, 999);  // End of day
+      }
+
+      // Calculate start time (N days before end time)
+      const startTime = new Date(endTime);
+      startTime.setDate(startTime.getDate() - this._config.days + 1);
+      startTime.setHours(0, 0, 0, 0);  // Start of first day at midnight
+
+      console.log(`Temperature Heatmap: Fetching from ${startTime.toLocaleString()} to ${endTime.toLocaleString()}`);
+      if (partialBucketKey) {
+        console.log(`Temperature Heatmap: Current partial bucket: ${partialBucketKey}`);
+      }
+
+      if (dataSource === 'statistics') {
+        await this._fetchStatisticsData(startTime, endTime, partialBucketKey);
+      } else {
+        await this._fetchHistoryApiData(startTime, endTime, partialBucketKey);
+      }
+
+      this._lastFetch = Date.now();
+
+      // Process and render data
+      const startProcess = Date.now();
+      this._processData();
+      const processDuration = ((Date.now() - startProcess) / 1000).toFixed(2);
+      console.log(`Temperature Heatmap: Processed data in ${processDuration}s`);
+
+      // Clear loading state BEFORE final render
+      this._isLoading = false;
+
+      console.log('Temperature Heatmap: Starting render...');
+      this._render();
+      console.log('Temperature Heatmap: Render complete');
+
+    } catch (error) {
+      console.error('Temperature Heatmap: Fetch error:', error);
+      this._isLoading = false;
+      this._error = {
+        message: 'Failed to fetch temperature history',
+        details: error.message
+      };
+      this._render();
+    }
+  }
+
+  // Fetch data using the history/period REST API (short-term states)
+  async _fetchHistoryApiData(startTime, endTime, partialBucketKey = null) {
+    const startTimeISO = startTime.toISOString();
+    const endTimeISO = endTime.toISOString();
+
+    console.log(`Temperature Heatmap: Using history API - Start: ${startTimeISO}, End: ${endTimeISO}`);
+
+    // Build API URL
+    const temperatureUrl = `history/period/${startTimeISO}?` +
+      `filter_entity_id=${this._config.entity}&` +
+      `end_time=${endTimeISO}&` +
+      `minimal_response&no_attributes`;
+
+    // Fetch with timeout
+    const startFetch = Date.now();
+    const result = await this.fetchWithCache(temperatureUrl);
+    const fetchDuration = ((Date.now() - startFetch) / 1000).toFixed(1);
+
+    console.log(`Temperature Heatmap: Received ${result?.[0]?.length || 0} temperature points in ${fetchDuration}s`);
+
+    this._historyData = {
+      temperature: result?.[0] || [],
+      startTime,
+      endTime,
+      partialBucketKey,
+      dataSource: 'history'
+    };
+  }
+
+  // Fetch data using the recorder/statistics_during_period WebSocket API (long-term statistics)
+  async _fetchStatisticsData(startTime, endTime, partialBucketKey = null) {
+    const startTimeISO = startTime.toISOString();
+    const endTimeISO = endTime.toISOString();
+
+    console.log(`Temperature Heatmap: Using statistics API - Start: ${startTimeISO}, End: ${endTimeISO}`);
+
+    // Fetch with timeout to prevent hanging
+    const fetchWithTimeout = (promise, timeoutMs = 30000) => {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Request timeout after 30 seconds')), timeoutMs)
+        )
+      ]);
+    };
+
+    const startFetch = Date.now();
+
+    // Call the WebSocket API for statistics
+    // The API returns hourly aggregated data (mean, min, max) from the statistics table
+    const statsResult = await fetchWithTimeout(
+      this._hass.callWS({
+        type: 'recorder/statistics_during_period',
+        start_time: startTimeISO,
+        end_time: endTimeISO,
+        statistic_ids: [this._config.entity],
+        period: 'hour',  // Hourly aggregates
+      })
+    );
+
+    const fetchDuration = ((Date.now() - startFetch) / 1000).toFixed(1);
+
+    // Convert statistics format to history format for processing
+    // Statistics API returns: { "sensor.entity": [{ start, end, mean, min, max, sum, state }, ...] }
+    const temperatureStats = statsResult[this._config.entity] || [];
+
+    console.log(`Temperature Heatmap: Received ${temperatureStats.length} temperature stats in ${fetchDuration}s`);
+
+    // Convert statistics to a format compatible with our processing
+    // Each stat has: start (ISO string), mean, min, max
+    const statisticType = this._config.statistic_type;  // 'mean', 'min', or 'max'
+
+    const temperatureData = temperatureStats.map(stat => ({
+      last_changed: stat.start,
+      state: String(stat[statisticType] ?? stat.mean ?? ''),
+    })).filter(point => point.state !== '' && point.state !== 'null');
+
+    this._historyData = {
+      temperature: temperatureData,
+      startTime,
+      endTime,
+      partialBucketKey,
+      dataSource: 'statistics'
+    };
+  }
+
+  // Process raw history data into grid structure
+  _processData() {
+    if (!this._historyData) {
+      this._processedData = null;
+      return;
+    }
+
+    const { temperature, startTime, partialBucketKey } = this._historyData;
+    const intervalHours = this._config.time_interval;
+    const rowsPerDay = 24 / intervalHours;
+
+    // Build grid with bucketed data
+    // Key format: "YYYY-MM-DD_HH" -> { sum, count, min, max }
+    const grid = {};
+
+    // Process temperature data into time buckets using optimized running statistics
+    temperature.forEach(point => {
+      const timestamp = new Date(point.last_changed || point.last_updated);
+      const dateKey = getDateKey(timestamp);
+      const hourKey = getHourBucket(timestamp.getHours(), intervalHours);
+      const key = `${dateKey}_${hourKey}`;
+
+      if (!grid[key]) {
+        grid[key] = { sum: 0, count: 0, min: null, max: null };
+      }
+
+      const value = parseFloat(point.state);
+      if (!isNaN(value)) {
+        grid[key].sum += value;
+        grid[key].count += 1;
+        grid[key].min = grid[key].min === null ? value : Math.min(grid[key].min, value);
+        grid[key].max = grid[key].max === null ? value : Math.max(grid[key].max, value);
+      }
+    });
+
+    // Calculate aggregated temperature for each bucket based on mode
+    Object.keys(grid).forEach(key => {
+      const bucket = grid[key];
+      if (bucket.count > 0) {
+        switch (this._config.aggregation_mode) {
+          case 'min':
+            bucket.temperature = bucket.min;
+            break;
+          case 'max':
+            bucket.temperature = bucket.max;
+            break;
+          case 'average':
+          default:
+            bucket.temperature = bucket.sum / bucket.count;
+            break;
+        }
+      } else {
+        bucket.temperature = null;
+      }
+    });
+
+    // Build row/column structure for grid
+    const dates = [];
+    for (let d = 0; d < this._config.days; d++) {
+      const date = new Date(startTime);
+      date.setDate(date.getDate() + d);
+      dates.push(date);
+    }
+
+    const rows = [];
+    let allTemperatures = [];
+
+    // Create rows for each time slot
+    for (let h = 0; h < rowsPerDay; h++) {
+      const hour = h * intervalHours;
+      const row = {
+        hour,
+        label: formatHourLabel(hour, this._config.time_format),
+        cells: dates.map(date => {
+          const dateKey = getDateKey(date);
+          const key = `${dateKey}_${hour}`;
+          const bucket = grid[key];
+
+          const cell = {
+            date,
+            temperature: bucket?.temperature ?? null,
+            hasData: bucket && bucket.temperature !== null,
+            isPartial: partialBucketKey && key === partialBucketKey
+          };
+
+          if (cell.temperature !== null) {
+            allTemperatures.push(cell.temperature);
+          }
+
+          return cell;
+        })
+      };
+      rows.push(row);
+    }
+
+    // Optional gap filling: forward-fill the last known value into empty buckets.
+    // Filling is done per-column (day) so gaps don't propagate across day boundaries.
+    // Filled cells are marked isFilled=true for visual distinction.
+    if (this._config.fill_gaps) {
+      for (let colIndex = 0; colIndex < dates.length; colIndex++) {
+        let lastKnownTemp = null;
+        for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+          const cell = rows[rowIndex].cells[colIndex];
+          if (cell.hasData) {
+            lastKnownTemp = cell.temperature;
+          } else if (lastKnownTemp !== null) {
+            // Fill with last known value
+            cell.temperature = lastKnownTemp;
+            cell.hasData = true;
+            cell.isFilled = true;
+          }
+        }
+      }
+    }
+
+    // Filter rows based on start_hour/end_hour configuration
+    // This affects both display and statistics
+    const filteredRows = rows.filter(row => this._shouldDisplayRow(row.hour));
+
+    // Collect all temperatures from filtered rows only for statistics
+    allTemperatures = [];
+    filteredRows.forEach(row => {
+      row.cells.forEach(cell => {
+        if (cell.temperature !== null) {
+          allTemperatures.push(cell.temperature);
+        }
+      });
+    });
+
+    // Calculate statistics
+    const stats = {
+      min: allTemperatures.length > 0 ? Math.min(...allTemperatures) : 0,
+      max: allTemperatures.length > 0 ? Math.max(...allTemperatures) : 0,
+      avg: allTemperatures.length > 0
+        ? allTemperatures.reduce((a, b) => a + b, 0) / allTemperatures.length
+        : 0
+    };
+
+    this._processedData = { rows: filteredRows, dates, stats };
+  }
+
+  // Check if a row with given hour should be displayed based on start_hour/end_hour filter
+  _shouldDisplayRow(rowHour) {
+    const startHour = this._config.start_hour;
+    const endHour = this._config.end_hour;
+
+    // Normal range: start_hour <= end_hour (e.g., 8 to 17)
+    if (startHour <= endHour) {
+      return rowHour >= startHour && rowHour <= endHour;
+    }
+
+    // Wrap-around range: start_hour > end_hour (e.g., 22 to 5)
+    // Display if hour is >= start (22, 23) OR <= end (0, 1, 2, 3, 4, 5)
+    return rowHour >= startHour || rowHour <= endHour;
+  }
+
+  // Main render method
+  _render() {
+    if (!this._config || !this._hass) return;
+
+    this._content.innerHTML = `
+      <div class="card-header">
+        <span class="title">${escapeHtml(this._config.title)}</span>
+        ${this._renderNavControls()}
+      </div>
+
+      ${this._error ? this._renderError() : ''}
+      ${this._isLoading ? this._renderLoading() : ''}
+      ${this._processedData && !this._error ? this._renderGrid() : ''}
+      ${this._processedData && !this._error && this._config.show_legend ? this._renderLegend() : ''}
+      ${this._processedData && !this._error ? this._renderFooter() : ''}
+    `;
+
+    // Apply compact-header class to card element
+    this._content.classList.toggle('compact-header', !!this._config.compact_header);
+
+    // Set CSS variables for grid layout and cell sizing
+    if (this._processedData) {
+      this._content.style.setProperty('--days-count', this._config.days);
+
+      const sizing = this._getEffectiveSizing();
+      this._content.style.setProperty('--cell-height', sizing.cellHeight);
+      this._content.style.setProperty('--cell-width', sizing.cellWidth);
+      this._content.style.setProperty('--cell-padding', sizing.cellPadding);
+      this._content.style.setProperty('--cell-gap', sizing.cellGap);
+      this._content.style.setProperty('--cell-font-size', sizing.cellFontSize);
+      this._content.style.setProperty('--cell-border-radius', this._config.rounded_corners ? '4px' : '0');
+    }
+  }
+
+  // Render navigation controls
+  _renderNavControls() {
+    const canGoForward = this._viewOffset < 0;
+    const showCurrentButton = this._viewOffset < 0;
+    const dateRange = this._getDateRangeLabel();
+
+    return `
+      <div class="nav-controls">
+        <button class="nav-btn" data-direction="back" aria-label="Previous period">&larr;</button>
+        <span class="date-range">${dateRange}</span>
+        <button class="nav-btn" data-direction="forward"
+                ${canGoForward ? '' : 'disabled'}
+                aria-label="Next period">&rarr;</button>
+        <button class="nav-btn-current ${showCurrentButton ? '' : 'hidden'}"
+                data-direction="current"
+                aria-label="Jump to current"
+                ${showCurrentButton ? '' : 'aria-hidden="true"'}>Current</button>
+      </div>
+    `;
+  }
+
+  // Get date range label for display
+  _getDateRangeLabel() {
+    if (!this._processedData) return '';
+
+    const { dates } = this._processedData;
+    const start = dates[0];
+    const end = dates[dates.length - 1];
+
+    const formatOpts = { month: 'short', day: 'numeric' };
+    const startStr = start.toLocaleDateString(undefined, formatOpts);
+    const endStr = end.toLocaleDateString(undefined, formatOpts);
+
+    return `${startStr} - ${endStr}`;
+  }
+
+  // Render loading state
+  _renderLoading() {
+    return `
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <div style="margin-top: 8px;">Loading temperature data...</div>
+      </div>
+    `;
+  }
+
+  // Render error state
+  _renderError() {
+    return `
+      <div class="error-message">
+        <div class="error-icon">!</div>
+        <div class="error-text">
+          <strong>${escapeHtml(this._error.message)}</strong>
+          <div class="error-details">${escapeHtml(this._error.details)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Render heatmap grid
+  _renderGrid() {
+    const { rows, dates } = this._processedData;
+
+    // Month header
+    const monthName = dates[0].toLocaleDateString(undefined, {
+      month: 'long',
+      year: 'numeric'
+    });
+
+    // Date headers
+    const dateHeaders = dates.map(date => {
+      const day = date.getDate();
+      return `<div class="date-header">${day}</div>`;
+    }).join('');
+
+    // Time labels (separate column)
+    const timeLabels = rows.map(row =>
+      `<div class="time-label">${row.label}</div>`
+    ).join('');
+
+    // Data cells
+    const dataCells = rows.map(row =>
+      row.cells.map(cell => this._renderCell(cell)).join('')
+    ).join('');
+
+    return `
+      <div class="heatmap-grid">
+        <div class="month-header">${monthName}</div>
+        <div class="grid-wrapper">
+          <div class="time-labels">
+            ${timeLabels}
+          </div>
+          <div class="data-grid-container">
+            <div class="date-headers">
+              ${dateHeaders}
+            </div>
+            <div class="data-grid">
+              ${dataCells}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Render individual cell
+  _renderCell(cell) {
+    if (!cell.hasData) {
+      return `<div class="cell no-data"><span class="temperature">-</span></div>`;
+    }
+
+    const thresholds = this._config.color_thresholds;
+    const interpolate = this._config.interpolate_colors;
+    const method = this._config.color_interpolation;
+    const bgColor = getColorForTemperature(cell.temperature, thresholds, interpolate, method);
+    const textColor = getContrastTextColor(bgColor);
+    const decimals = this._config.decimals;
+
+    // Add asterisk indicator for partial (in-progress) buckets
+    const partialIndicator = cell.isPartial ? '*' : '';
+    const partialLabel = cell.isPartial ? ' (in progress)' : '';
+    const filledLabel = cell.isFilled ? ' (estimated)' : '';
+
+    // Build CSS class list
+    let cellClass = 'cell';
+    if (cell.isPartial) cellClass += ' partial';
+    if (cell.isFilled) cellClass += ' filled';
+
+    return `
+      <div class="${cellClass}"
+           style="background-color: ${bgColor}; color: ${textColor}"
+           data-temperature="${cell.temperature}"
+           data-date="${cell.date.toISOString()}"
+           data-partial="${cell.isPartial ? 'true' : 'false'}"
+           data-filled="${cell.isFilled ? 'true' : 'false'}"
+           tabindex="0"
+           role="button"
+           aria-label="Temperature ${cell.temperature.toFixed(decimals)}${partialLabel}${filledLabel}">
+        <span class="temperature">${cell.temperature.toFixed(decimals)}${partialIndicator}</span>
+      </div>
+    `;
+  }
+
+  // Render legend bar
+  _renderLegend() {
+    const thresholds = this._config.color_thresholds;
+    if (!thresholds || thresholds.length === 0) return '';
+
+    const unit = this._getUnit();
+    const interpolate = this._config.interpolate_colors;
+    const method = this._config.color_interpolation;
+
+    const minVal = thresholds[0].value;
+    const maxVal = thresholds[thresholds.length - 1].value;
+    const range = maxVal - minVal || 1;
+
+    let gradientStops;
+
+    if (interpolate && thresholds.length >= 2) {
+      const stops = [];
+
+      for (let i = 0; i <= 20; i++) {
+        const t = i / 20;
+        const value = minVal + t * range;
+        const color = getColorForTemperature(value, thresholds, true, method);
+        stops.push(`${color} ${(t * 100).toFixed(1)}%`);
+      }
+
+      gradientStops = stops.join(', ');
+    } else {
+      const stops = [];
+
+      for (let i = 0; i < thresholds.length; i++) {
+        const current = thresholds[i];
+        const pct = ((current.value - minVal) / range) * 100;
+
+        stops.push(`${current.color} ${pct.toFixed(1)}%`);
+
+        if (i < thresholds.length - 1) {
+          const next = thresholds[i + 1];
+          const nextPct = ((next.value - minVal) / range) * 100;
+
+          stops.push(`${current.color} ${nextPct.toFixed(1)}%`);
+        }
+      }
+
+      gradientStops = stops.join(', ');
+    }
+
+    // Scale-aware label positioning with collision detection.
+    // Labels that would render within MIN_LABEL_SPACING% of the previous
+    // visible label are skipped, preventing overlapping text on dense
+    // threshold configurations (e.g. default F thresholds at high end).
+    const MIN_LABEL_SPACING = 8; // percent of bar width
+    let lastLabelPct = -Infinity;
+    const labels = thresholds.map(t => {
+      const pct = ((t.value - minVal) / range) * 100;
+      if (pct - lastLabelPct < MIN_LABEL_SPACING) return '';
+      lastLabelPct = pct;
+      return `<span style="position:absolute; left:${pct.toFixed(1)}%;">${t.value}${unit}</span>`;
+    }).join('');
+
+    return `
+    <div class="legend">
+      <div class="legend-bar" style="background: linear-gradient(to right, ${gradientStops})"></div>
+      <div class="legend-labels" style="position:relative;">
+        ${labels}
+      </div>
+    </div>
+  `;
+  }
+
+
+  // Render footer with statistics
+  _renderFooter() {
+    const { stats } = this._processedData;
+    const unit = this._getUnit();
+    const decimals = this._config.decimals;
+
+    let entityName = '';
+    if (this._config.show_entity_name) {
+      const stateObj = this._hass?.states[this._config.entity];
+      const friendlyName = stateObj?.attributes?.friendly_name || this._config.entity;
+      entityName = `<div class="entity-name">${escapeHtml(friendlyName)}</div>`;
+    }
+
+    return `
+      <div class="footer">
+        <div class="footer-stats">
+          <span>Min: ${stats.min.toFixed(decimals)} ${unit}</span>
+          <span>Max: ${stats.max.toFixed(decimals)} ${unit}</span>
+          <span>Avg: ${stats.avg.toFixed(decimals)} ${unit}</span>
+        </div>
+        ${entityName}
+      </div>
+    `;
+  }
+
+  // Get unit of measurement for temperature
+  _getUnit() {
+    let unit;
+
+    // Try config first
+    if (this._config.unit) {
+      unit = this._config.unit;
+    } else {
+      // Auto-detect from entity attributes
+      const stateObj = this._hass?.states[this._config.entity];
+      unit = stateObj?.attributes?.unit_of_measurement || '°F';
+    }
+
+    // Strip degree symbol if show_degree_symbol is false
+    if (!this._config.show_degree_symbol) {
+      unit = unit.replace('°', '');
+    }
+
+    return unit;
+  }
+
+  // Handle all click events (event delegation)
+  _handleClick(e) {
+    // Navigation buttons (both regular nav-btn and nav-btn-current)
+    const navBtn = e.target.closest('.nav-btn, .nav-btn-current');
+    if (navBtn && !navBtn.disabled) {
+      const direction = navBtn.dataset.direction;
+      this._handleNavigation(direction);
+      return;
+    }
+
+    // Cell clicks
+    const cell = e.target.closest('.cell');
+    if (cell && !cell.classList.contains('no-data')) {
+      this._handleCellClick(cell);
+    }
+  }
+
+  // Handle navigation button clicks
+  _handleNavigation(direction) {
+    if (direction === 'back') {
+      // Go back one period
+      this._viewOffset -= this._config.days;
+    } else if (direction === 'forward') {
+      // Go forward one period
+      this._viewOffset += this._config.days;
+      // Don't allow going into the future
+      if (this._viewOffset > 0) {
+        this._viewOffset = 0;
+      }
+    } else if (direction === 'current') {
+      // Jump to current view
+      this._viewOffset = 0;
+    }
+
+    // Fetch new data for the offset period
+    this._fetchHistoryData();
+  }
+
+  // Handle cell click events
+  _handleCellClick(cellElement) {
+    const action = this._config.click_action;
+
+    switch (action) {
+      case 'more-info':
+        this._showMoreInfo();
+        break;
+      case 'tooltip':
+        this._showTooltip(cellElement);
+        break;
+    }
+  }
+
+  // Show Home Assistant more-info dialog
+  _showMoreInfo() {
+    this.dispatchEvent(new CustomEvent('hass-more-info', {
+      bubbles: true,
+      composed: true,
+      detail: { entityId: this._config.entity }
+    }));
+  }
+
+  // Show tooltip with cell details
+  _showTooltip(cellElement) {
+    const temperature = parseFloat(cellElement.dataset.temperature);
+    const date = new Date(cellElement.dataset.date);
+    const isPartial = cellElement.dataset.partial === 'true';
+    const isFilled = cellElement.dataset.filled === 'true';
+
+    // Remove any existing tooltip
+    const existing = this.shadowRoot.querySelector('.tooltip');
+    if (existing) {
+      existing.remove();
+    }
+
+    // Create tooltip element
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip';
+
+    const dateStr = date.toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric'
+    });
+
+    const unit = this._getUnit();
+    const decimals = this._config.decimals;
+    const partialNote = isPartial ? '<div><em>(in progress)</em></div>' : '';
+    const filledNote = isFilled ? '<div><em>(estimated - gap filled)</em></div>' : '';
+
+    tooltip.innerHTML = `
+      <div><strong>${dateStr}</strong></div>
+      <div>Temperature: ${temperature.toFixed(decimals)} ${unit}</div>
+      <div>Mode: ${this._config.aggregation_mode}</div>
+      ${partialNote}
+      ${filledNote}
+    `;
+
+    // Position tooltip near the cell
+    const rect = cellElement.getBoundingClientRect();
+    const parentRect = this._content.getBoundingClientRect();
+    tooltip.style.left = `${rect.left - parentRect.left + rect.width / 2}px`;
+    tooltip.style.top = `${rect.bottom - parentRect.top + 4}px`;
+    tooltip.style.transform = 'translateX(-50%)';
+
+    this._content.appendChild(tooltip);
+
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      if (tooltip.parentElement) {
+        tooltip.remove();
+      }
+    }, 3000);
+  }
+
+  // Get effective sizing configuration (handles compact mode override)
+  _getEffectiveSizing() {
+    // If compact mode is enabled, use preset values
+    if (this._config.compact) {
+      return {
+        cellHeight: "24px",
+        cellWidth: "1fr",
+        cellPadding: "1px",
+        cellGap: "1px",
+        cellFontSize: "9px",
+      };
+    }
+
+    // Otherwise use configured or default values
+    return {
+      cellHeight: normalizeSize(this._config.cell_height, "36px"),
+      cellWidth: normalizeSize(this._config.cell_width, "1fr"),
+      cellPadding: normalizeSize(this._config.cell_padding, "2px"),
+      cellGap: normalizeSize(this._config.cell_gap, "2px"),
+      cellFontSize: normalizeSize(this._config.cell_font_size, "11px"),
+    };
+  }
+}
+
+// Visual configuration editor for the Temperature Heatmap Card
+
+
+/**
+ * Visual editor for the Temperature Heatmap Card.
+ * Provides a UI for configuring all card options.
+ */
+class TemperatureHeatmapCardEditor extends HTMLElement {
+  set hass(hass) {
+    this._hass = hass;
+    if (!this.content) this._buildEditor();
+  }
+
+  async setConfig(config) {
+    // Clone to avoid modifying the read-only object
+    this._config = { ...(config || {}) };
+
+    // Ensure that the entity picker element is available to us before we render.
+    // https://github.com/thomasloven/hass-config/wiki/PreLoading-Lovelace-Elements
+    const helpers = await window.loadCardHelpers();
+    if (!customElements.get('ha-entity-picker')) {
+      const entitiesCard = await helpers.createCardElement({
+        type: 'entities',
+        entities: [],
+      });
+      await entitiesCard.constructor.getConfigElement();
+    }
+
+    // Default values
+    const defaults = {
+      entity: '',
+      title: 'Temperature History',
+      days: 7,
+      time_interval: 2,
+      time_format: '24',
+      start_hour: 0,
+      end_hour: 23,
+      aggregation_mode: 'average',
+      decimals: 1,
+      unit: '',
+      refresh_interval: 300,
+      click_action: 'more-info',
+      show_entity_name: false,
+      show_legend: false,
+      cell_height: 36,
+      cell_width: '1fr',
+      cell_padding: 2,
+      cell_gap: 2,
+      cell_font_size: 11,
+      compact: false,
+      compact_header: false,
+      rounded_corners: true,
+      interpolate_colors: false,
+      color_interpolation: 'hsl',
+      color_thresholds: [],  // Empty array - editor will populate, card auto-detects if empty
+      data_source: 'auto',
+      statistic_type: 'mean',
+      fill_gaps: false,
+    };
+    this._config = { ...defaults, ...this._config };
+
+    if (this.content) this._updateValues();
+  }
+
+  getConfig() {
+    return { ...this._config };
+  }
+
+  _buildEditor() {
+    this.content = document.createElement('div');
+    this.content.style.display = 'grid';
+    this.content.style.gridGap = '8px';
+    this.content.style.padding = '8px';
+    this.appendChild(this.content);
+
+    this.container_threshold = {};
+    this.fields = {};
+
+    // Field definitions
+    const fields = [
+      { type: 'entity', key: 'entity', label: 'Entity', required: true },
+      { type: 'text', key: 'title', label: 'Title' },
+      { type: 'number', key: 'days', label: 'Days', min: 1, max: 365 },
+      { type: 'number', key: 'time_interval', label: 'Time Interval (hours)', min: 1, max: 24 },
+      { type: 'select', key: 'time_format', label: 'Time Format', options: { 24: '24h', 12: '12h' } },
+      { type: 'number', key: 'start_hour', label: 'Start Hour', min: 0, max: 23 },
+      { type: 'number', key: 'end_hour', label: 'End Hour', min: 0, max: 23 },
+      { type: 'select', key: 'aggregation_mode', label: 'Aggregation Mode', options: { average: 'Average', min: 'Min', max: 'Max' } },
+      { type: 'select', key: 'data_source', label: 'Data Source', options: { 'auto': 'Auto (statistics for past, history for current)', 'history': 'History only (limited by purge_keep_days)', 'statistics': 'Statistics only (long-term hourly data)' } },
+      { type: 'select', key: 'statistic_type', label: 'Statistic Type', options: { 'mean': 'Average', 'max': 'Maximum', 'min': 'Minimum' } },
+      { type: 'number', key: 'decimals', label: 'Decimals', min: 0, max: 2 },
+      { type: 'select', key: 'unit', label: 'Unit', options: { '°C': 'Celsius', '°F': 'Fahrenheit' } },
+      { type: 'number', key: 'refresh_interval', label: 'Refresh Interval (s)', min: 10, max: 3600 },
+      { type: 'select', key: 'click_action', label: 'Click Action', options: { none: 'None', 'more-info': 'More Info', tooltip: 'Tooltip' } },
+      { type: 'switch', key: 'show_entity_name', label: 'Show Entity Name' },
+      { type: 'switch', key: 'show_legend', label: 'Show Legend' },
+      { type: 'switch', key: 'show_degree_symbol', label: 'Show Degree Symbol (°)' },
+      { type: 'number', key: 'cell_height', label: 'Cell Height', min: 10, max: 200 },
+      { type: 'text', key: 'cell_width', label: 'Cell Width (px or fr)' },
+      { type: 'number', key: 'cell_padding', label: 'Cell Padding', min: 0, max: 50 },
+      { type: 'number', key: 'cell_gap', label: 'Cell Gap', min: 0, max: 50 },
+      { type: 'number', key: 'cell_font_size', label: 'Cell Font Size', min: 6, max: 32 },
+      { type: 'switch', key: 'compact', label: 'Compact Mode' },
+      { type: 'switch', key: 'compact_header', label: 'Compact Header' },
+      { type: 'switch', key: 'rounded_corners', label: 'Rounded Corners' },
+      { type: 'switch', key: 'interpolate_colors', label: 'Interpolate Colors' },
+      { type: 'select', key: 'color_interpolation', label: 'Color Interpolation', options: { rgb: 'RGB', gamma: 'Gamma RGB', hsl: 'HSL', lab: 'LAB' } },
+      { type: 'switch', key: 'fill_gaps', label: 'Fill Gaps - use at your own risk (forward-fills last known value into empty buckets)' },
+      { type: 'thresholds', key: 'color_thresholds', label: 'Colors' },
+    ];
+
+    // Create fields dynamically
+    fields.forEach((f) => this._createField(f));
+
+    this._updateValues();
+  }
+
+  _createThresholdEditor() {
+    // Function to create a threshold row
+    const createRow = (threshold, index) => {
+      const row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.alignItems = 'center';
+      row.style.gap = '8px';
+
+      const valueInput = document.createElement('ha-textfield');
+      valueInput.type = 'number';
+      valueInput.value = threshold.value;
+
+      valueInput.addEventListener('change', (e) => {
+        e.stopPropagation();
+        const newThresholds = [...this._config.color_thresholds];
+        const updatedThreshold = { ...this._config.color_thresholds[index] };
+        updatedThreshold.value = Number(e.target.value);
+        newThresholds[index] = updatedThreshold;
+        this._onFieldChange('color_thresholds', newThresholds);
+        this._refreshThresholdEditor();
+      });
+
+      const colorInput = document.createElement('input');
+      colorInput.type = 'color';
+      colorInput.value = threshold.color;
+      colorInput.addEventListener('change', (e) => {
+        e.stopPropagation();
+        const newThresholds = [...this._config.color_thresholds];
+        const updatedThreshold = { ...this._config.color_thresholds[index] };
+        updatedThreshold.color = e.target.value;
+        newThresholds[index] = updatedThreshold;
+        this._onFieldChange('color_thresholds', newThresholds);
+        this._refreshThresholdEditor();
+      });
+
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = 'X';
+      removeBtn.style.cursor = 'pointer';
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const newThresholds = [...this._config.color_thresholds];
+        newThresholds.splice(index, 1);
+        this._onFieldChange('color_thresholds', newThresholds);
+        this._refreshThresholdEditor();
+      });
+
+      row.appendChild(valueInput);
+      row.appendChild(colorInput);
+      row.appendChild(removeBtn);
+      this.container_threshold.appendChild(row);
+    };
+
+    // Create all rows
+    if (!this._config.color_thresholds) this._config.color_thresholds = [];
+    this._config.color_thresholds.forEach((t, i) => createRow(t, i));
+  }
+
+  _refreshThresholdEditor() {
+    // Remove old rows and recreate
+    while (this.container_threshold.firstChild) {
+      this.container_threshold.removeChild(this.container_threshold.firstChild);
+    }
+    this._createThresholdEditor();
+  }
+
+  _updateValues() {
+    if (!this._config) return;
+    for (const key in this.fields) {
+      const input = this.fields[key].input;
+      if (this.fields[key].type === 'checkbox' || this.fields[key].type === 'switch') {
+        input.checked = !!this._config[key];
+      } else if (this.fields[key].type === 'thresholds') {
+        this._refreshThresholdEditor();
+      } else {
+        input.value = this._config[key] !== undefined ? this._config[key] : '';
+      }
+    }
+  }
+
+  // Generic function to create a field
+  _createField({ type, key, label, min, max, options, required }) {
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'flex';
+    wrapper.style.flexDirection = 'column';
+    wrapper.style.marginBottom = '8px';
+
+    let input;
+
+    if (type === 'switch') {
+      // Switch / checkbox
+      wrapper.style.flexDirection = 'row';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.gap = '8px';
+
+      input = document.createElement('ha-switch');
+
+      const lbl = document.createElement('label');
+      lbl.textContent = label;
+
+      wrapper.appendChild(input);
+      wrapper.appendChild(lbl);
+
+      input.addEventListener('change', (e) => {
+        e.stopPropagation();
+        this._onFieldChange(key, input.checked);
+      });
+    } else if (type === 'thresholds') {
+      const lbl = document.createElement('label');
+      lbl.textContent = label;
+      wrapper.appendChild(lbl);
+
+      // Container for the list
+      const list = document.createElement('div');
+      list.style.display = 'grid';
+      list.style.gridGap = '8px';
+      wrapper.appendChild(list);
+
+      this.container_threshold = list;
+
+      // Button to add a threshold
+      const addBtn = document.createElement('button');
+      addBtn.textContent = 'Add Threshold';
+      addBtn.style.marginTop = '8px';
+      addBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const newThresholds = [...this._config.color_thresholds];
+        newThresholds.push({ value: 0, color: '#ffffff' });
+        this._onFieldChange(key, newThresholds);
+      });
+
+      wrapper.appendChild(addBtn);
+    } else {
+      // All other types with label above
+      const lbl = document.createElement('label');
+      lbl.textContent = label;
+      wrapper.appendChild(lbl);
+
+      if (type === 'entity') {
+        input = document.createElement('ha-entity-picker');
+        input.setAttribute('allow-custom-entity', '');
+        input.hass = this._hass;
+
+        input.addEventListener('value-changed', (e) => {
+          e.stopPropagation();
+          this._onFieldChange(key, e.detail.value);
+        });
+      } else if (type === 'number' || type === 'text') {
+        input = document.createElement('ha-textfield');
+        input.type = type;
+        if (min !== undefined) input.min = min;
+        if (max !== undefined) input.max = max;
+        if (required) input.required = true;
+
+        input.addEventListener('change', (e) => {
+          e.stopPropagation();
+          const value = type === 'number' ? Number(input.value) : input.value;
+          this._onFieldChange(key, value);
+        });
+      } else if (type === 'select') {
+        input = document.createElement('ha-select');
+        for (const val in options) {
+          const opt = document.createElement('mwc-list-item');
+          opt.value = val;
+          opt.innerText = options[val];
+          input.appendChild(opt);
+        }
+
+        input.addEventListener('selected', (e) => {
+          e.stopPropagation();
+          this._onFieldChange(key, e.target.value);
+        });
+        input.addEventListener('closed', (e) => {
+          e.stopPropagation();
+        });
+      }
+
+      wrapper.appendChild(input);
+    }
+    this.fields[key] = {};
+    this.fields[key].input = input;
+    this.fields[key].type = type;
+    this.content.appendChild(wrapper);
+  }
+
+  // Handle field changes
+  _onFieldChange(key, value) {
+    const newConfig = { ...this._config, [key]: value };
+    this._config = newConfig;
+    this.dispatchEvent(
+      new CustomEvent('config-changed', {
+        detail: { config: newConfig },
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  // Cleanup when editor is removed from DOM
+  disconnectedCallback() {
+    this.fields = {};
+    this.container_threshold = null;
+  }
+}
+
+// Temperature Heatmap Card - Entry point
+
+
+// Register with Home Assistant custom cards
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: 'ha-temperature-heatmap-card',
+  name: 'Temperature Heatmap Card',
+  description: 'Display temperature history as a color-coded heatmap'
+});
+
+// Console banner
+console.info(
+  '%c TEMPERATURE-HEATMAP-CARD %c v' + VERSION + ' ',
+  'color: lightblue; font-weight: bold; background: black',
+  'color: white; font-weight: bold; background: dimgray'
+);
+
+// Register custom elements
+customElements.define('ha-temperature-heatmap-card-editor', TemperatureHeatmapCardEditor);
+customElements.define('ha-temperature-heatmap-card', TemperatureHeatmapCard);

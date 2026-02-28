@@ -1,5 +1,4 @@
 import resolve from '@rollup/plugin-node-resolve';
-import terser from '@rollup/plugin-terser';
 
 // Generate timestamp in dd-mmm-yyyy HH:mm format
 const now = new Date();
@@ -18,16 +17,10 @@ export default {
   output: {
     file: 'dist/ha-temperature-heatmap-card.js',
     format: 'es',
-    sourcemap: true,
+    sourcemap: false,
     banner: `/* Last modified: ${timestamp} */`,
   },
   plugins: [
     resolve(),
-    terser({
-      format: {
-        comments: /^!/,
-        preamble: `/* Last modified: ${timestamp} */`,
-      },
-    }),
   ],
 };
