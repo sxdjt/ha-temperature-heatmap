@@ -1,6 +1,6 @@
 {
   "name": "ha-temperature-heatmap-card",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "A Home Assistant Lovelace card displaying temperature history as a color-coded heatmap",
   "type": "module",
   "main": "dist/ha-temperature-heatmap-card.js",

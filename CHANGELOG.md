@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2026-02-27
+
+### Added
+- `fill_gaps` option: forward-fills the last known sensor value into empty buckets within
+  each column; filled cells display with a dashed border and are marked as "estimated"
+  in tooltips. Note: use with caution - filled values are estimates, not real readings.
+
+### Fixed
+- Legend labels now positioned at the left edge of their corresponding color zone
+  so the label value visually falls within the correct color band (e.g., 50F label
+  now appears inside the green zone, not at the cyan/green boundary)
+
 ## [0.6.0] - 2026-02-26
 
 ### Added
