@@ -354,6 +354,39 @@ export function createStyleElement() {
       white-space: nowrap;
     }
 
+    /* Compact header: reduces padding, title size, and nav arrow size */
+    .compact-header .card-header {
+      padding: 4px 8px;
+      gap: 4px;
+    }
+
+    .compact-header .title {
+      font-size: 14px;
+    }
+
+    .compact-header .nav-btn {
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+    }
+
+    .compact-header .nav-btn-current {
+      padding: 2px 6px;
+      font-size: 11px;
+    }
+
+    .compact-header .month-header {
+      font-size: 13px;
+      margin-bottom: 4px;
+      padding: 2px 0;
+    }
+
+    .compact-header .footer {
+      padding: 6px 8px;
+      gap: 4px;
+      font-size: 11px;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 600px) {
       .data-grid {

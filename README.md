@@ -42,6 +42,7 @@ A custom Home Assistant Lovelace card that displays temperature data as a color-
 | `color_interpolation` | string | `"hsl"` | Interpolation method: "rgb", "gamma", "hsl", or "lab" |
 | `color_thresholds` | array | See below | Color mapping for temperatures |
 | `compact` | boolean | `false` | Enable compact mode (overrides cell sizing properties) |
+| `compact_header` | boolean | `false` | Reduce title size, header/footer padding, and nav arrow size |
 | `data_source` | string | `"auto"` | Data source: "auto", "history", or "statistics" |
 | `days` | number | `7` | Number of days to display (1-30) |
 | `decimals` | number | `1` | Decimal places to display: 0, 1, or 2 |

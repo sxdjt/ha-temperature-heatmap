@@ -209,6 +209,9 @@ export class TemperatureHeatmapCard extends HTMLElement {
 
       // Gap filling: forward-fill last known value into empty buckets (use at your own risk)
       fill_gaps: config.fill_gaps || false,
+
+      // Compact header: reduce padding around month/year label and shrink nav arrows
+      compact_header: config.compact_header || false,
     };
 
     // Sort thresholds by value (ascending) - create mutable copy to avoid "read-only" errors
@@ -713,6 +716,9 @@ export class TemperatureHeatmapCard extends HTMLElement {
       ${this._processedData && !this._error && this._config.show_legend ? this._renderLegend() : ''}
       ${this._processedData && !this._error ? this._renderFooter() : ''}
     `;
+
+    // Apply compact-header class to card element
+    this._content.classList.toggle('compact-header', !!this._config.compact_header);
 
     // Set CSS variables for grid layout and cell sizing
     if (this._processedData) {
