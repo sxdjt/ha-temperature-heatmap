@@ -13,13 +13,16 @@ claude.md
 .DS_Store
 Thumbs.db
 
-# Node modules (if added later)
+# Node modules
 node_modules/
-package-lock.json
 
-# Build artifacts
+# Build system (no longer used - single-file deployment)
+src/
+dist/
 build/
-dist/*.map
+rollup.config.js
+package.json
+package-lock.json
 
 # Logs
 *.log
