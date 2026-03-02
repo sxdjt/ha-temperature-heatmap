@@ -1,4 +1,4 @@
-/* Last modified: 28-Feb-2026 */
+/* Last modified: 01-Mar-2026 */
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -1583,11 +1583,20 @@ class TemperatureHeatmapCard extends HTMLElement {
     // Optional gap filling: forward-fill the last known value into empty buckets.
     // Filling is done per-column (day) so gaps don't propagate across day boundaries.
     // Filled cells are marked isFilled=true for visual distinction.
+    // Future time slots are never filled.
     if (this._config.fill_gaps) {
+      const now = new Date();
       for (let colIndex = 0; colIndex < dates.length; colIndex++) {
         let lastKnownTemp = null;
         for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-          const cell = rows[rowIndex].cells[colIndex];
+          const row = rows[rowIndex];
+          const cell = row.cells[colIndex];
+
+          // Stop filling once we reach future time slots (rows are in ascending order)
+          const cellTime = new Date(cell.date);
+          cellTime.setHours(row.hour, 0, 0, 0);
+          if (cellTime > now) break;
+
           if (cell.hasData) {
             lastKnownTemp = cell.temperature;
           } else if (lastKnownTemp !== null) {
