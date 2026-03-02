@@ -51,7 +51,7 @@ function getDefaultThresholdsForUnit(unit) {
 }
 
 // Card version
-const VERSION = '0.7.0';
+const VERSION = '0.8.0';
 
 // ---------------------------------------------------------------------------
 // Color utilities

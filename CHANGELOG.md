@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0] - 2026-03-01
+
+### Added
+- `compact_header` option (default: false) to reduce title size, header/footer padding, and nav arrow size
+
+### Changed
+- Simplified to single-file deployment; build system and TypeScript source removed
+
+### Fixed
+- `fill_gaps` no longer fills future time slots; forward-fill now stops at the current time
+
 ## [0.7.0] - 2026-02-27
 
 ### Added
