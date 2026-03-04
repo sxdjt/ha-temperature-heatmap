@@ -51,7 +51,9 @@ A custom Home Assistant Lovelace card that displays temperature data as a color-
 | `interpolate_colors` | boolean | `false` | Enable smooth color interpolation between thresholds |
 | `refresh_interval` | number | `300` | Data refresh interval in seconds |
 | `rounded_corners` | boolean | `true` | Enable rounded corners on cells (set to false for flat grid) |
+| `show_degree_symbol` | boolean | `true` | Show degree symbol (°) in all temperature displays |
 | `show_entity_name` | boolean | `false` | Show entity friendly name in footer |
+| `show_month_year` | boolean | `true` | Show month/year label above the grid |
 | `start_hour` | number | `0` | Start hour for display filter (0-23) |
 | `statistic_type` | string | `"mean"` | Statistic to use for statistics data: "mean", "min", or "max" |
 | `time_format` | string | `"24"` | Time format: "12" or "24" |

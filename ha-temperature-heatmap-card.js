@@ -1,4 +1,4 @@
-/* Last modified: 01-Mar-2026 */
+/* Last modified: 03-Mar-2026 */
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -51,7 +51,7 @@ function getDefaultThresholdsForUnit(unit) {
 }
 
 // Card version
-const VERSION = '0.8.0';
+const VERSION = '0.8.1';
 
 // ---------------------------------------------------------------------------
 // Color utilities
@@ -1153,6 +1153,9 @@ class TemperatureHeatmapCard extends HTMLElement {
 
       // Compact header: reduce padding around month/year label and shrink nav arrows
       compact_header: config.compact_header || false,
+
+      // Show/hide the month/year label row (removes element entirely when false)
+      show_month_year: config.show_month_year !== false,  // Default true
     };
 
     // Sort thresholds by value (ascending) - create mutable copy to avoid "read-only" errors
@@ -1769,9 +1772,13 @@ class TemperatureHeatmapCard extends HTMLElement {
       row.cells.map(cell => this._renderCell(cell)).join('')
     ).join('');
 
+    const monthHeader = this._config.show_month_year
+      ? `<div class="month-header">${monthName}</div>`
+      : '';
+
     return `
       <div class="heatmap-grid">
-        <div class="month-header">${monthName}</div>
+        ${monthHeader}
         <div class="grid-wrapper">
           <div class="time-labels">
             ${timeLabels}
@@ -2190,6 +2197,7 @@ class TemperatureHeatmapCardEditor extends HTMLElement {
       { type: 'number', key: 'cell_font_size', label: 'Cell Font Size', min: 6, max: 32 },
       { type: 'switch', key: 'compact', label: 'Compact Mode' },
       { type: 'switch', key: 'compact_header', label: 'Compact Header' },
+      { type: 'switch', key: 'show_month_year', label: 'Show Month/Year Label' },
       { type: 'switch', key: 'rounded_corners', label: 'Rounded Corners' },
       { type: 'switch', key: 'interpolate_colors', label: 'Interpolate Colors' },
       { type: 'select', key: 'color_interpolation', label: 'Color Interpolation', options: { rgb: 'RGB', gamma: 'Gamma RGB', hsl: 'HSL', lab: 'LAB' } },
